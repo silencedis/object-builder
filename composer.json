@@ -1,0 +1,26 @@
+{
+    "name": "silencedis/object-builder",
+    "description": "A set of components to build objects automatically using type hinting.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Yurii Slobodeniuk",
+            "email": "silencedis@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=7.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0.0",
+        "silencedis/phpunit-mock-helper": "v0.1.x-dev",
+        "silencedis/protected-members-accessor": "v0.1.x-dev"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SilenceDis\\ObjectBuilder\\Test\\": "tests"
+        }
+    }
+}
