@@ -2,7 +2,7 @@
 
 namespace SilenceDis\ObjectBuilder\BuildersContainer;
 
-use SilenceDis\ObjectBuilder\Builder\ObjectBuilderInterface;
+use SilenceDis\ObjectBuilder\Builder\BuilderInterface;
 
 /**
  * Interface BuildersContainerInterface
@@ -14,10 +14,10 @@ interface BuildersContainerInterface
     /**
      * @param string $id
      *
-     * @return \SilenceDis\ObjectBuilder\Builder\ObjectBuilderInterface
+     * @return \SilenceDis\ObjectBuilder\Builder\BuilderInterface
      * @throws \SilenceDis\ObjectBuilder\BuildersContainer\BuilderNotFoundExceptionInterface
      */
-    public function get(string $id): ObjectBuilderInterface;
+    public function get(string $id): BuilderInterface;
 
     /**
      * @param string $id

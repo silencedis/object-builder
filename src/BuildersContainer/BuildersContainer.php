@@ -2,7 +2,7 @@
 
 namespace SilenceDis\ObjectBuilder\BuildersContainer;
 
-use SilenceDis\ObjectBuilder\Builder\ObjectBuilderInterface;
+use SilenceDis\ObjectBuilder\Builder\BuilderInterface;
 
 /**
  * Class BuildersContainer
@@ -12,15 +12,15 @@ use SilenceDis\ObjectBuilder\Builder\ObjectBuilderInterface;
 class BuildersContainer implements BuildersContainerInterface
 {
     /**
-     * @var ObjectBuilderInterface[]
+     * @var BuilderInterface[]
      */
     private $builders = [];
 
     /**
      * @param string $id
-     * @param ObjectBuilderInterface $builder
+     * @param BuilderInterface $builder
      */
-    public function registerBuilder(string $id, ObjectBuilderInterface $builder): void
+    public function registerBuilder(string $id, BuilderInterface $builder): void
     {
         $this->builders[$id] = $builder;
     }
@@ -28,7 +28,7 @@ class BuildersContainer implements BuildersContainerInterface
     /**
      * @inheritDoc
      */
-    public function get(string $id): ObjectBuilderInterface
+    public function get(string $id): BuilderInterface
     {
         if (!isset($this->builders[$id])) {
             throw new BuilderNotFoundException();
