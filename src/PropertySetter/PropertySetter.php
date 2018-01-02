@@ -76,7 +76,7 @@ class PropertySetter implements PropertySetterInterface
                 // It's assumed that setters have only one parameter
                 $parametersReflections = $methodReflection->getParameters();
                 if (count($parametersReflections) !== 1) {
-                    throw new CannotSetPropertyException('Setters must have one parameter');
+                    throw new CannotSetPropertyException('Setters must have one parameter.');
                 }
                 $parameterReflection = array_shift($parametersReflections);
                 if (!$parameterReflection->hasType() || $value === null && $parameterReflection->allowsNull()) {

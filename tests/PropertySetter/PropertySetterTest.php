@@ -6,10 +6,13 @@ use PHPUnit\Framework\TestCase;
 use SilenceDis\ObjectBuilder\BuildersContainer\BuilderNotFoundExceptionInterface;
 use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
 use SilenceDis\ObjectBuilder\PropertySetter\CannotSetPropertyException;
+use SilenceDis\ObjectBuilder\PropertySetter\CannotSetPropertyExceptionInterface;
 use SilenceDis\ObjectBuilder\PropertySetter\PropertySetter;
 use SilenceDis\ObjectBuilder\Test\Fixture\PrivatePropertiesObject;
+use SilenceDis\ObjectBuilder\Test\Fixture\PrivatePropertyAndSetterObject;
 use SilenceDis\ObjectBuilder\Test\Fixture\PublicPropertiesObject;
 use SilenceDis\ObjectBuilder\Test\Fixture\PublicPropertyWithSetterObject;
+use SilenceDis\ObjectBuilder\Test\Fixture\SettersWithNotOneArgumentObject;
 use SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException;
 use SilenceDis\PHPUnitMockHelper\MockHelper;
 
@@ -133,5 +136,67 @@ class PropertySetterTest extends TestCase
         $this->assertTrue($object->foo === $testPropertyValue, 'The test public property must be set.');
     }
 
+    /**
+     * @throws BuilderNotFoundExceptionInterface
+     * @throws CannotSetPropertyException
+     */
+    public function testSetThrowsExceptionIfSetterIsNotPublic()
+    {
+        $testPropertyName = 'foo';
+        $testPropertySetter = 'setFoo';
+        $testPropertyValue = 'test string'; // The value doesn't matter in this test
 
+        $buildersContainer = $this->getBuildersContainerMock();
+
+        try {
+            /** @var \PHPUnit_Framework_MockObject_MockObject|PrivatePropertiesObject $object */
+            $object = (new MockHelper($this))->mockObject(
+                PrivatePropertyAndSetterObject::class,
+                ['methods' => [$testPropertySetter]]
+            );
+        } catch (InvalidMockTypeException $e) {
+            $this->markTestSkipped('Failed to create the mock of PublicPropertyWithSetterObject.');
+        }
+
+        $setter = new PropertySetter($object, $buildersContainer);
+        $this->expectException(CannotSetPropertyExceptionInterface::class);
+
+        $setter->set($testPropertyName, $testPropertyValue);
+    }
+
+    /**
+     * @throws BuilderNotFoundExceptionInterface
+     * @throws CannotSetPropertyException
+     */
+    public function testSetThrowsExceptionWhenSetterDoesNotHaveArguments()
+    {
+        $testPropertyName = 'foo';
+        $testPropertyValue = 'test string';
+
+        $buildersContainer = $this->getBuildersContainerMock();
+        $object = new SettersWithNotOneArgumentObject();
+        $setter = new PropertySetter($object, $buildersContainer);
+
+        $this->expectException(CannotSetPropertyException::class);
+        $this->expectExceptionMessage('Setters must have one parameter.');
+        $setter->set($testPropertyName, $testPropertyValue);
+    }
+
+    /**
+     * @throws BuilderNotFoundExceptionInterface
+     * @throws CannotSetPropertyException
+     */
+    public function testSetThrowsExceptionWhenSetterHaveMoreThanOneArgument()
+    {
+        $testPropertyName = 'bar';
+        $testPropertyValue = 'test string';
+
+        $buildersContainer = $this->getBuildersContainerMock();
+        $object = new SettersWithNotOneArgumentObject();
+        $setter = new PropertySetter($object, $buildersContainer);
+
+        $this->expectException(CannotSetPropertyException::class);
+        $this->expectExceptionMessage('Setters must have one parameter.');
+        $setter->set($testPropertyName, $testPropertyValue);
+    }
 }
