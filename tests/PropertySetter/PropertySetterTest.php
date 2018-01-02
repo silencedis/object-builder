@@ -9,6 +9,7 @@ use SilenceDis\ObjectBuilder\PropertySetter\CannotSetPropertyException;
 use SilenceDis\ObjectBuilder\PropertySetter\PropertySetter;
 use SilenceDis\ObjectBuilder\Test\Fixture\PrivatePropertiesObject;
 use SilenceDis\ObjectBuilder\Test\Fixture\PublicPropertiesObject;
+use SilenceDis\ObjectBuilder\Test\Fixture\PublicPropertyWithSetterObject;
 use SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException;
 use SilenceDis\PHPUnitMockHelper\MockHelper;
 
@@ -99,4 +100,38 @@ class PropertySetterTest extends TestCase
             $this->fail('Failed to set the test property.');
         }
     }
+
+    public function testPublicPropertyHasHigherPriorityThanItsSetter()
+    {
+        $testPropertyName = 'foo';
+        $testPropertySetter = 'setFoo';
+        $testPropertyValue = 'test string'; // The value doesn't matter in this test
+
+        $buildersContainer = $this->getBuildersContainerMock();
+
+        try {
+            /** @var \PHPUnit_Framework_MockObject_MockObject|PublicPropertyWithSetterObject $object */
+            $object = (new MockHelper($this))->mockObject(
+                PublicPropertyWithSetterObject::class,
+                ['methods' => [$testPropertySetter]]
+            );
+        } catch (InvalidMockTypeException $e) {
+            $this->markTestSkipped('Failed to create the mock of PublicPropertyWithSetterObject.');
+        }
+
+        $setter = new PropertySetter($object, $buildersContainer);
+
+        $object->expects($this->never())->method($testPropertySetter);
+
+        try {
+            $setter->set($testPropertyName, $testPropertyValue);
+        } catch (BuilderNotFoundExceptionInterface $e) {
+        } catch (CannotSetPropertyException $e) {
+            $this->fail('Failed to set the test property.');
+        }
+
+        $this->assertTrue($object->foo === $testPropertyValue, 'The test public property must be set.');
+    }
+
+
 }
