@@ -1,18 +1,16 @@
 <?php
 
-namespace SilenceDis\ObjectBuilder\PropertySetter;
+namespace SilenceDis\ObjectBuilder\Test\PropertySetter;
 
 /**
- * Interface PropertySetterInterface
+ * Interface PropertiesSetterInterface
  *
  * @author Yurii Slobodeniuk <silencedis@gmail.com>
  */
 interface PropertySetterInterface
 {
     /**
-     * @param string $property
-     * @param mixed $value
-     * @throws CannotSetPropertyExceptionInterface
+     * @throws PropertySetterExceptionInterface
      */
-    public function set(string $property, $value): void;
+    public function set(): void;
 }

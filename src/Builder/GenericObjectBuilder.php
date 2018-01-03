@@ -4,8 +4,8 @@ namespace SilenceDis\ObjectBuilder\Builder;
 
 use SilenceDis\ObjectBuilder\BuildersContainer\BuilderNotFoundExceptionInterface;
 use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
-use SilenceDis\ObjectBuilder\PropertySetter\CannotSetPropertyException;
-use SilenceDis\ObjectBuilder\PropertySetter\PropertySetter;
+use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterException;
+use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter;
 
 /**
  * Class GenericObjectBuilder
@@ -44,12 +44,12 @@ class GenericObjectBuilder implements BuilderInterface
      *
      * @return mixed|object
      * @throws BuilderNotFoundExceptionInterface
-     * @throws CannotSetPropertyException
+     * @throws PropertiesSetterException
      */
     public function build($rawData, BuildersContainerInterface $objectBuildersContainer)
     {
         $object = clone($this->objectPrototype);
-        $setter = new PropertySetter($object, $objectBuildersContainer);
+        $setter = new PropertiesSetter($object, $objectBuildersContainer);
         foreach ($rawData as $propertyName => $rawValue) {
             $setter->set($propertyName, $rawValue);
         }

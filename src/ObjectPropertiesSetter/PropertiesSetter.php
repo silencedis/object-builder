@@ -1,15 +1,16 @@
 <?php
 
-namespace SilenceDis\ObjectBuilder\PropertySetter;
+namespace SilenceDis\ObjectBuilder\ObjectPropertiesSetter;
 
 use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
+use SilenceDis\ObjectBuilder\Test\PropertySetter\DirectPropertySetter;
 
 /**
- * Class PropertySetter
+ * Class PropertiesSetter
  *
  * @author Yurii Slobodeniuk <silencedis@gmail.com>
  */
-class PropertySetter implements PropertySetterInterface
+class PropertiesSetter implements PropertiesSetterInterface
 {
     /**
      * @var object
@@ -26,7 +27,7 @@ class PropertySetter implements PropertySetterInterface
     private $objectBuildersContainer = [];
 
     /**
-     * PropertySetter constructor.
+     * PropertiesSetter constructor.
      *
      * @param object $object
      *
@@ -55,7 +56,7 @@ class PropertySetter implements PropertySetterInterface
      * @param string $property
      * @param mixed $value
      *
-     * @throws \SilenceDis\ObjectBuilder\PropertySetter\CannotSetPropertyException
+     * @throws \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterException
      * @throws \SilenceDis\ObjectBuilder\BuildersContainer\BuilderNotFoundExceptionInterface
      */
     public function set(string $property, $value): void
@@ -64,6 +65,8 @@ class PropertySetter implements PropertySetterInterface
             $propertyReflection = $this->objectReflection->getProperty($property);
             if ($propertyReflection->isPublic()) {
                 $propertyReflection->setValue($this->object, $value);
+                $propertySetter = new DirectPropertySetter($this->object, $property, $value);
+                $propertySetter->set();
 
                 return;
             }
@@ -76,7 +79,7 @@ class PropertySetter implements PropertySetterInterface
                 // It's assumed that setters have only one parameter
                 $parametersReflections = $methodReflection->getParameters();
                 if (count($parametersReflections) !== 1) {
-                    throw new CannotSetPropertyException('Setters must have one parameter.');
+                    throw new PropertiesSetterException('Setters must have one parameter.');
                 }
                 $parameterReflection = array_shift($parametersReflections);
                 if (!$parameterReflection->hasType() || $value === null && $parameterReflection->allowsNull()) {
@@ -102,7 +105,7 @@ class PropertySetter implements PropertySetterInterface
             }
         }
 
-        throw new CannotSetPropertyException(
+        throw new PropertiesSetterException(
             sprintf('Cannot set property "%s" of the class "%s"', $property, $this->objectReflection->getName())
         );
     }
