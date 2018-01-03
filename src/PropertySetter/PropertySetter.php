@@ -85,8 +85,9 @@ class PropertySetter implements PropertySetterInterface
                     return;
                 }
 
-                $parameterType = $parameterReflection->getType();
-                if (gettype($value) == $parameterType) {
+                $parameterType = $parameterReflection->getType()->getName();
+                $valueType = is_object($value) ? get_class($value) : gettype($value);
+                if ($valueType == $parameterType) {
                     $methodReflection->invoke($this->object, $value);
 
                     return;
