@@ -9,5 +9,5 @@ namespace SilenceDis\ObjectBuilder\Test\Fixture;
  */
 class PublicPropertiesObject
 {
-    public $property1;
+    public $foo;
 }

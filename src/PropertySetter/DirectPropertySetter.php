@@ -1,6 +1,6 @@
 <?php
 
-namespace SilenceDis\ObjectBuilder\Test\PropertySetter;
+namespace SilenceDis\ObjectBuilder\PropertySetter;
 
 /**
  * Class DirectPropertySetter

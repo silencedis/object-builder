@@ -6,9 +6,9 @@ use PHPUnit\Framework\TestCase;
 use SilenceDis\ObjectBuilder\Builder\BuilderInterface;
 use SilenceDis\ObjectBuilder\BuildersContainer\BuilderNotFoundExceptionInterface;
 use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
+use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter;
 use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterException;
 use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterExceptionInterface;
-use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter;
 use SilenceDis\ObjectBuilder\Test\Fixture\PrivatePropertiesObject;
 use SilenceDis\ObjectBuilder\Test\Fixture\PrivatePropertyAndSetterObject;
 use SilenceDis\ObjectBuilder\Test\Fixture\PublicPropertiesObject;
@@ -54,7 +54,7 @@ class PropertySetterTest extends TestCase
         $object = new PublicPropertiesObject();
         $setter = new PropertiesSetter($object);
 
-        $propertyName = 'property1';
+        $propertyName = 'foo';
         $setter->set($propertyName, $value);
         $this->assertTrue($object->{$propertyName} === $value, 'The property must be set as is.');
     }
