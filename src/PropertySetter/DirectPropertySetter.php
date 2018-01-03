@@ -36,8 +36,8 @@ class DirectPropertySetter implements PropertySetterInterface
         if (!is_object($object)) {
             throw new \TypeError(
                 sprintf(
-                    "Argument \"object\" passed to %s must be an object. \"%s\" given.",
-                    __METHOD__,
+                    "Argument \"object\" passed to the constructor of %s must be an object. \"%s\" given.",
+                    __CLASS__,
                     gettype($object)
                 )
             );
