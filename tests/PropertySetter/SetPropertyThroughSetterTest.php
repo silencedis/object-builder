@@ -9,7 +9,7 @@ use SilenceDis\ObjectBuilder\Test\Fixture\PrivatePropertiesObject;
 use SilenceDis\ObjectBuilder\Test\Fixture\PrivatePropertyAndSetterObject;
 use SilenceDis\PHPUnitMockHelper\MockHelper;
 
-class MutatorPropertySetterTest extends TestCase
+class SetPropertyThroughSetterTest extends TestCase
 {
     /**
      * If the `object` constructor argument is not object, the TypeError exception will be thrown.

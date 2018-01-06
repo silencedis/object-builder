@@ -1,6 +1,6 @@
 <?php
 
-namespace SilenceDis\ObjectBuilder\Test\PropertySetter;
+namespace SilenceDis\ObjectBuilder\Test\ObjectPropertiesSetter;
 
 use PHPUnit\Framework\TestCase;
 use SilenceDis\ObjectBuilder\Builder\BuilderInterface;
@@ -19,7 +19,7 @@ use SilenceDis\ObjectBuilder\Test\Fixture\TypeHintedPropertyObject;
 use SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException;
 use SilenceDis\PHPUnitMockHelper\MockHelper;
 
-class PropertySetterTest extends TestCase
+class PropertiesSetterTest extends TestCase
 {
     /**
      * @param array $mockConfig

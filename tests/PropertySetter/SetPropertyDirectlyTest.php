@@ -8,7 +8,7 @@ use SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface;
 use SilenceDis\ObjectBuilder\Test\Fixture\PrivatePropertiesObject;
 use SilenceDis\ObjectBuilder\Test\Fixture\PublicPropertiesObject;
 
-class DirectPropertySetterTest extends TestCase
+class SetPropertyDirectlyTest extends TestCase
 {
     /**
      * If the `object` constructor argument is not object, the TypeError exception will be thrown.
