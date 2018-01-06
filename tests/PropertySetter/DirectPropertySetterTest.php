@@ -3,7 +3,7 @@
 namespace SilenceDis\ObjectBuilder\Test\PropertySetter;
 
 use PHPUnit\Framework\TestCase;
-use SilenceDis\ObjectBuilder\PropertySetter\DirectPropertySetter;
+use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly;
 use SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface;
 use SilenceDis\ObjectBuilder\Test\Fixture\PrivatePropertiesObject;
 use SilenceDis\ObjectBuilder\Test\Fixture\PublicPropertiesObject;
@@ -13,7 +13,7 @@ class DirectPropertySetterTest extends TestCase
     /**
      * If the `object` constructor argument is not object, the TypeError exception will be thrown.
      *
-     * @covers       \SilenceDis\ObjectBuilder\PropertySetter\DirectPropertySetter::__construct
+     * @covers       \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly::__construct
      * @dataProvider dataInvalidObjectValues
      * @param $invalidObjectValue
      */
@@ -21,7 +21,7 @@ class DirectPropertySetterTest extends TestCase
     {
         $this->expectException(\TypeError::class);
         // The "property" and "value" parameters of constructor don't matter.
-        new DirectPropertySetter($invalidObjectValue, 'foo', 'bar');
+        new SetPropertyDirectly($invalidObjectValue, 'foo', 'bar');
     }
 
     public function dataInvalidObjectValues()
@@ -39,7 +39,7 @@ class DirectPropertySetterTest extends TestCase
     /**
      * If the property doesn't exist in the object, the PropertySetterException must be thrown.
      *
-     * @covers \SilenceDis\ObjectBuilder\PropertySetter\DirectPropertySetter::__construct
+     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly::__construct
      */
     public function testConstructor_2()
     {
@@ -47,13 +47,13 @@ class DirectPropertySetterTest extends TestCase
         $property = 'notExistedProperty';
         $value = 'test string'; // The value doesn't matter in this test.
         $this->expectException(PropertySetterExceptionInterface::class);
-        new DirectPropertySetter($object, $property, $value);
+        new SetPropertyDirectly($object, $property, $value);
     }
 
     /**
      * If the property is not public, the PropertySetterException must be thrown.
      *
-     * @covers \SilenceDis\ObjectBuilder\PropertySetter\DirectPropertySetter::__construct
+     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly::__construct
      */
     public function testConstructor_3()
     {
@@ -61,13 +61,13 @@ class DirectPropertySetterTest extends TestCase
         $property = 'property1';
         $value = 'test string'; // The value doesn't matter in this test.
         $this->expectException(PropertySetterExceptionInterface::class);
-        new DirectPropertySetter($object, $property, $value);
+        new SetPropertyDirectly($object, $property, $value);
     }
 
     /**
      * If the value is valid and the property is public, it must be set correctly.
      *
-     * @covers \SilenceDis\ObjectBuilder\PropertySetter\DirectPropertySetter::set
+     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly::set
      */
     public function testSet_1()
     {
@@ -75,7 +75,7 @@ class DirectPropertySetterTest extends TestCase
         $property = 'foo';
         $value = 'test string';
 
-        $setter = new DirectPropertySetter($object, $property, $value);
+        $setter = new SetPropertyDirectly($object, $property, $value);
         $setter->set();
 
         $this->assertTrue($object->foo === $value);

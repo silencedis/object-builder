@@ -3,7 +3,7 @@
 namespace SilenceDis\ObjectBuilder\ObjectPropertiesSetter;
 
 use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
-use SilenceDis\ObjectBuilder\PropertySetter\DirectPropertySetter;
+use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly;
 
 /**
  * Class PropertiesSetter
@@ -64,7 +64,7 @@ class PropertiesSetter implements PropertiesSetterInterface
         if ($this->objectReflection->hasProperty($property)) {
             $propertyReflection = $this->objectReflection->getProperty($property);
             if ($propertyReflection->isPublic()) {
-                $propertySetter = new DirectPropertySetter($this->object, $property, $value);
+                $propertySetter = new SetPropertyDirectly($this->object, $property, $value);
                 $propertySetter->set();
 
                 return;

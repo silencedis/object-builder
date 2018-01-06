@@ -3,11 +3,11 @@
 namespace SilenceDis\ObjectBuilder\PropertySetter;
 
 /**
- * Class MutatorPropertySetter
+ * Class SetPropertyThroughSetter
  *
  * @author Yurii Slobodeniuk <silencedis@gmail.com>
  */
-class MutatorPropertySetter implements PropertySetterInterface
+class SetPropertyThroughSetter implements PropertySetterInterface
 {
     /**
      * @var object
@@ -23,7 +23,7 @@ class MutatorPropertySetter implements PropertySetterInterface
     private $value;
 
     /**
-     * MutatorPropertySetter constructor.
+     * SetPropertyThroughSetter constructor.
      *
      * @param object $object
      * @param string $propertyName

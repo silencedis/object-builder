@@ -3,11 +3,11 @@
 namespace SilenceDis\ObjectBuilder\PropertySetter;
 
 /**
- * Class DirectPropertySetter
+ * Class SetPropertyDirectly
  *
  * @author Yurii Slobodeniuk <silencedis@gmail.com>
  */
-class DirectPropertySetter implements PropertySetterInterface
+class SetPropertyDirectly implements PropertySetterInterface
 {
     /**
      * @var object
@@ -23,7 +23,7 @@ class DirectPropertySetter implements PropertySetterInterface
     private $value;
 
     /**
-     * DirectPropertySetter constructor.
+     * SetPropertyDirectly constructor.
      *
      * @param $object
      * @param string $property

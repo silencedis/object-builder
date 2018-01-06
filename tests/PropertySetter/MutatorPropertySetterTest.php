@@ -3,7 +3,7 @@
 namespace SilenceDis\ObjectBuilder\Test\PropertySetter;
 
 use PHPUnit\Framework\TestCase;
-use SilenceDis\ObjectBuilder\PropertySetter\MutatorPropertySetter;
+use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter;
 use SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface;
 use SilenceDis\ObjectBuilder\Test\Fixture\PrivatePropertiesObject;
 use SilenceDis\ObjectBuilder\Test\Fixture\PrivatePropertyAndSetterObject;
@@ -14,7 +14,7 @@ class MutatorPropertySetterTest extends TestCase
     /**
      * If the `object` constructor argument is not object, the TypeError exception will be thrown.
      *
-     * @covers       \SilenceDis\ObjectBuilder\PropertySetter\MutatorPropertySetter::__construct
+     * @covers       \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter::__construct
      * @dataProvider dataInvalidObjectValues
      * @param $invalidObjectValue
      */
@@ -22,7 +22,7 @@ class MutatorPropertySetterTest extends TestCase
     {
         $this->expectException(\TypeError::class);
         // The "property" and "value" parameters of constructor don't matter.
-        new MutatorPropertySetter($invalidObjectValue, 'foo', 'bar');
+        new SetPropertyThroughSetter($invalidObjectValue, 'foo', 'bar');
     }
 
     public function dataInvalidObjectValues()
@@ -40,7 +40,7 @@ class MutatorPropertySetterTest extends TestCase
     /**
      * If the property doesn't exist in the object, the PropertySetterException must be thrown.
      *
-     * @covers \SilenceDis\ObjectBuilder\PropertySetter\MutatorPropertySetter::__construct
+     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter::__construct
      */
     public function testConstructor_2()
     {
@@ -48,13 +48,13 @@ class MutatorPropertySetterTest extends TestCase
         $property = 'notExistedProperty'; // Actually, the setter of this property doesn't exist.
         $value = 'test string'; // The value doesn't matter in this test.
         $this->expectException(PropertySetterExceptionInterface::class);
-        new MutatorPropertySetter($object, $property, $value);
+        new SetPropertyThroughSetter($object, $property, $value);
     }
 
     /**
      * If the property is not public, the PropertySetterException must be thrown.
      *
-     * @covers \SilenceDis\ObjectBuilder\PropertySetter\MutatorPropertySetter::__construct
+     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter::__construct
      */
     public function testConstructor_3()
     {
@@ -62,13 +62,13 @@ class MutatorPropertySetterTest extends TestCase
         $property = 'foo';
         $value = 'test string'; // Actually, the setter of this property is not accessible.
         $this->expectException(PropertySetterExceptionInterface::class);
-        new MutatorPropertySetter($object, $property, $value);
+        new SetPropertyThroughSetter($object, $property, $value);
     }
 
     /**
      * If the value is valid and the property is public, it must be set correctly.
      *
-     * @covers \SilenceDis\ObjectBuilder\PropertySetter\MutatorPropertySetter::set
+     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter::set
      * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
      */
     public function testSet_1()
@@ -76,7 +76,7 @@ class MutatorPropertySetterTest extends TestCase
         $property = 'property1';
         $setterMethod = 'setProperty1';
         $value = 'test string';
-        /** @var \PHPUnit_Framework_MockObject_MockObject|MutatorPropertySetter $setter */
+        /** @var \PHPUnit_Framework_MockObject_MockObject|SetPropertyThroughSetter $setter */
         $object = (new MockHelper($this))->mockObject(
             PrivatePropertiesObject::class,
             [
@@ -84,7 +84,7 @@ class MutatorPropertySetterTest extends TestCase
             ]
         );
 
-        $setter = new MutatorPropertySetter($object, $property, $value);
+        $setter = new SetPropertyThroughSetter($object, $property, $value);
         $object->expects($this->once())->method($setterMethod)->with($value);
         $setter->set();
     }
