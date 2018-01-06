@@ -3,13 +3,15 @@
 namespace SilenceDis\ObjectBuilder\Test\PropertySetter;
 
 use PHPUnit\Framework\TestCase;
-use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly;
 use SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface;
+use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly;
 use SilenceDis\ObjectBuilder\Test\Fixture\PrivatePropertiesObject;
 use SilenceDis\ObjectBuilder\Test\Fixture\PublicPropertiesObject;
 
 class SetPropertyDirectlyTest extends TestCase
 {
+    # region constructor
+
     /**
      * If the `object` constructor argument is not object, the TypeError exception will be thrown.
      *
@@ -21,7 +23,7 @@ class SetPropertyDirectlyTest extends TestCase
     {
         $this->expectException(\TypeError::class);
         // The "property" and "value" parameters of constructor don't matter.
-        new SetPropertyDirectly($invalidObjectValue, 'foo', 'bar');
+        $setter = new SetPropertyDirectly($invalidObjectValue, 'foo', 'bar');
     }
 
     public function dataInvalidObjectValues()
@@ -64,6 +66,10 @@ class SetPropertyDirectlyTest extends TestCase
         new SetPropertyDirectly($object, $property, $value);
     }
 
+    # endregion
+
+    # region set
+
     /**
      * If the value is valid and the property is public, it must be set correctly.
      *
@@ -80,4 +86,23 @@ class SetPropertyDirectlyTest extends TestCase
 
         $this->assertTrue($object->foo === $value);
     }
+
+    # endregion
+
+    # region canSet
+
+    /**
+     * The method "canSet" returns a boolean.
+     */
+//    public function testCanSet_1()
+//    {
+//        $object = new PublicPropertiesObject();
+//        $property = 'foo';
+//        $value = 'test string';
+//        $setter = new SetPropertyDirectly($object, $property, $value);
+//        $actualResult = $setter->canSet();
+//        $this->assertTrue(is_bool($actualResult));
+//    }
+
+    # endregion
 }
