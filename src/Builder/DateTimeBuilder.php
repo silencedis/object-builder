@@ -9,7 +9,7 @@ use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
  *
  * @author Yurii Slobodeniuk <silencedis@gmail.com>
  */
-class DateTimeBuilder implements ObjectBuilderInterface
+class DateTimeBuilder implements BuilderInterface
 {
     public function build($rawData, BuildersContainerInterface $objectBuildersContainer): \DateTime
     {

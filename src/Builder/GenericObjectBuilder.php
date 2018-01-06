@@ -12,7 +12,7 @@ use SilenceDis\ObjectBuilder\PropertySetter\PropertySetter;
  *
  * @author Yurii Slobodeniuk <silencedis@gmail.com>
  */
-class GenericObjectBuilder implements ObjectBuilderInterface
+class GenericObjectBuilder implements BuilderInterface
 {
     /**
      * @var object

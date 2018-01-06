@@ -9,7 +9,7 @@ use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
  *
  * @author Yurii Slobodeniuk <silencedis@gmail.com>
  */
-class PlainValueBuilder implements ObjectBuilderInterface
+class PlainValueBuilder implements BuilderInterface
 {
     public function build($rawData, BuildersContainerInterface $objectBuildersContainer)
     {

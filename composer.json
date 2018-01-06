@@ -18,6 +18,11 @@
         "silencedis/phpunit-mock-helper": "v0.1.x-dev",
         "silencedis/protected-members-accessor": "v0.1.x-dev"
     },
+    "autoload": {
+        "psr-4": {
+            "SilenceDis\\ObjectBuilder\\": "src"
+        }
+    },
     "autoload-dev": {
         "psr-4": {
             "SilenceDis\\ObjectBuilder\\Test\\": "tests"

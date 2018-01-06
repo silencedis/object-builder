@@ -5,11 +5,11 @@ namespace SilenceDis\ObjectBuilder\Builder;
 use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
 
 /**
- * Interface ObjectBuilderInterface
+ * Interface BuilderInterface
  *
  * @author Yurii Slobodeniuk <silencedis@gmail.com>
  */
-interface ObjectBuilderInterface
+interface BuilderInterface
 {
     /**
      * @param mixed $rawData
