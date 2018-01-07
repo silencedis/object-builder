@@ -9,13 +9,11 @@ namespace SilenceDis\ObjectBuilder\PropertyInfo;
  */
 interface PropertyInfoInterface
 {
-    /**
-     * @return bool
-     */
     public function hasAccessibleField(): bool;
 
-    /**
-     * @return bool
-     */
     public function hasAccessibleSetter(): bool;
+
+    public function getObject();
+
+    public function getObjectReflection(): \ReflectionClass;
 }
