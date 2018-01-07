@@ -12,61 +12,41 @@ class PrivatePropertiesObject
     /**
      * @var mixed
      */
-    private $property1;
+    private $foo;
     /**
      * @var string
      */
-    private $property2;
+    private $bar;
 
     /**
      * @return mixed
      */
-    public function getProperty1()
+    public function getFoo()
     {
-        return $this->property1;
+        return $this->foo;
     }
 
     /**
-     * @param mixed $property1
+     * @param mixed $foo
      */
-    public function setProperty1($property1): void
+    public function setFoo($foo): void
     {
-        $this->property1 = $property1;
+        $this->foo = $foo;
     }
 
     /**
      * @return string
      */
-    public function getProperty2(): string
+    public function getBar(): string
     {
-        return $this->property2;
+        return $this->bar;
     }
 
     /**
-     * @param string $property2
+     * @param string $bar
      */
-    public function setProperty2(string $property2): void
+    public function setBar(string $bar): void
     {
-        $this->property2 = $property2;
+        $this->bar = $bar;
     }
-
-    /**
-     * @return PrivatePropertiesObject
-     */
-    public function getProperty3(): PrivatePropertiesObject
-    {
-        return $this->property3;
-    }
-
-    /**
-     * @param PrivatePropertiesObject $property3
-     */
-    public function setProperty3(PrivatePropertiesObject $property3): void
-    {
-        $this->property3 = $property3;
-    }
-    /**
-     * @var PrivatePropertiesObject
-     */
-    private $property3;
 }

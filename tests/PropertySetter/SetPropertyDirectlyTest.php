@@ -60,7 +60,7 @@ class SetPropertyDirectlyTest extends TestCase
     public function testConstructor_3()
     {
         $object = new PrivatePropertiesObject();
-        $property = 'property1';
+        $property = 'foo';
         $value = 'test string'; // The value doesn't matter in this test.
         $this->expectException(PropertySetterExceptionInterface::class);
         new SetPropertyDirectly($object, $property, $value);

@@ -73,8 +73,8 @@ class SetPropertyThroughSetterTest extends TestCase
      */
     public function testSet_1()
     {
-        $property = 'property1';
-        $setterMethod = 'setProperty1';
+        $property = 'foo';
+        $setterMethod = 'setFoo';
         $value = 'test string';
         /** @var \PHPUnit_Framework_MockObject_MockObject|SetPropertyThroughSetter $setter */
         $object = (new MockHelper($this))->mockObject(

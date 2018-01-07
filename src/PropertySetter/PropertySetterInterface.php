@@ -16,7 +16,7 @@ interface PropertySetterInterface
      * @param string $propertyName
      * @return mixed
      */
-    public function canSet(\ReflectionClass $objectReflection, string $propertyName);
+    public function canSet(\ReflectionClass $objectReflection, string $propertyName): bool;
 
     /**
      * @throws PropertySetterExceptionInterface

@@ -30,12 +30,12 @@ class PropertyInfoTest extends TestCase
         return [
             [
                 new PublicPropertiesObject(),
-                'property1',
+                'foo',
                 true,
             ],
             [
                 new PrivatePropertiesObject(),
-                'property1',
+                'foo',
                 false,
             ],
             [

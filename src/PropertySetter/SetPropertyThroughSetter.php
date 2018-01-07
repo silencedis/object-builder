@@ -67,4 +67,9 @@ class SetPropertyThroughSetter implements PropertySetterInterface
     {
         $this->methodReflection->invoke($this->object, $this->value);
     }
+
+    public function canSet(\ReflectionClass $objectReflection, string $propertyName): bool
+    {
+        // TODO: Implement canSet() method.
+    }
 }

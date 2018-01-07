@@ -68,4 +68,9 @@ class SetPropertyDirectly implements PropertySetterInterface
     {
         $this->propertyReflection->setValue($this->object, $this->value);
     }
+
+    public function canSet(\ReflectionClass $objectReflection, string $propertyName): bool
+    {
+        // TODO: Implement canSet() method.
+    }
 }

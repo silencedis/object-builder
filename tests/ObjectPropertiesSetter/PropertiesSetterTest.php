@@ -85,8 +85,8 @@ class PropertiesSetterTest extends TestCase
      */
     public function testSet_2()
     {
-        $testPropertyName = 'property1';
-        $testPropertySetter = 'setProperty1';
+        $testPropertyName = 'foo';
+        $testPropertySetter = 'setFoo';
         $testValue = 'test string'; // The value type doesn't matter in this test
 
         $buildersContainer = $this->getBuildersContainerMock();
