@@ -20,26 +20,35 @@ class PropertyInfo implements PropertyInfoInterface
         $this->propertyName = $propertyName;
     }
 
-    public function hasAccessibleField(): bool
+    public function publicPropertyExists(): bool
     {
         if (!$this->objectReflection->hasProperty($this->propertyName)) {
             return false;
         }
-        $fieldReflection = $this->objectReflection->getProperty($this->propertyName);
+        $propertyReflection = $this->objectReflection->getProperty($this->propertyName);
 
-        return $fieldReflection->isPublic();
+        return $propertyReflection->isPublic();
     }
 
-    public function hasAccessibleSetter(): bool
+    public function publicSetterExists(): bool
     {
+        $methodName = sprintf('set%s', ucfirst($this->propertyName));
+        if (!$this->objectReflection->hasMethod($methodName)) {
+            return false;
+        }
+        $methodReflection = $this->objectReflection->getMethod($methodName);
+
+        return $methodReflection->isPublic();
     }
 
     public function getObject()
     {
+        return $this->object;
     }
 
     public function getObjectReflection(): \ReflectionClass
     {
+        return $this->objectReflection;
     }
 }
 

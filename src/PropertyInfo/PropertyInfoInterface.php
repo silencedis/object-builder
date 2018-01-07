@@ -9,9 +9,9 @@ namespace SilenceDis\ObjectBuilder\PropertyInfo;
  */
 interface PropertyInfoInterface
 {
-    public function hasAccessibleField(): bool;
+    public function publicPropertyExists(): bool;
 
-    public function hasAccessibleSetter(): bool;
+    public function publicSetterExists(): bool;
 
     public function getObject();
 

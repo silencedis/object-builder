@@ -11,21 +11,21 @@ use SilenceDis\ObjectBuilder\Test\Fixture\PublicPropertiesObject;
 class PropertyInfoTest extends TestCase
 {
     /**
-     * @covers       \SilenceDis\ObjectBuilder\PropertyInfo\PropertyInfo::hasAccessibleField
-     * @dataProvider dataHasAccessibleField
+     * @covers       \SilenceDis\ObjectBuilder\PropertyInfo\PropertyInfo::publicPropertyExists
+     * @dataProvider dataPublicPropertyExists
      *
      * @param object $object
      * @param string $propertyName
      * @param bool $expectedResult
      */
-    public function testHasAccessibleField($object, $propertyName, $expectedResult)
+    public function testPublicPropertyExists($object, $propertyName, $expectedResult)
     {
         $info = new PropertyInfo($object, $propertyName);
-        $actualResult = $info->hasAccessibleField();
+        $actualResult = $info->publicPropertyExists();
         $this->assertTrue($expectedResult === $actualResult);
     }
 
-    public function dataHasAccessibleField()
+    public function dataPublicPropertyExists()
     {
         return [
             [
@@ -44,5 +44,66 @@ class PropertyInfoTest extends TestCase
                 false,
             ],
         ];
+    }
+
+    /**
+     * @covers       \SilenceDis\ObjectBuilder\PropertyInfo\PropertyInfo::publicSetterExists()
+     * @dataProvider dataPublicSetterExists
+     *
+     * @param $object
+     * @param $propertyName
+     * @param $expectedResult
+     */
+    public function testPublicSetterExists($object, $propertyName, $expectedResult)
+    {
+        $info = new PropertyInfo($object, $propertyName);
+        $actualResult = $info->publicSetterExists();
+        $this->assertTrue($expectedResult === $actualResult);
+    }
+
+    public function dataPublicSetterExists()
+    {
+        return [
+            [
+                new PrivatePropertiesObject(),
+                'foo',
+                true,
+            ],
+            [
+                new PublicPropertiesObject(),
+                'foo',
+                false,
+            ],
+            [
+                new NoPropertiesObject(),
+                'foo',
+                false,
+            ],
+        ];
+    }
+
+    /**
+     * @covers \SilenceDis\ObjectBuilder\PropertyInfo\PropertyInfo::getObject
+     */
+    public function testGetObject()
+    {
+        $object = new PublicPropertiesObject();
+        $propertyName = 'asdf'; // The property name doesn't matter in this test
+        $propertyInfo = new PropertyInfo($object, $propertyName);
+        $actualResult = $propertyInfo->getObject();
+        $this->assertTrue($actualResult === $object);
+    }
+
+    /**
+     * @covers \SilenceDis\ObjectBuilder\PropertyInfo\PropertyInfo::getObjectReflection
+     */
+    public function testGetObjectReflection()
+    {
+        $object = new PublicPropertiesObject();
+        $objectReflection = new \ReflectionClass($object);
+        $propertyName = 'asdf'; // The property name doesn't matter in this test
+        $propertyInfo = new PropertyInfo($object, $propertyName);
+        $actualResult = $propertyInfo->getObjectReflection();
+        $this->assertEquals($objectReflection, $actualResult);
     }
 }
