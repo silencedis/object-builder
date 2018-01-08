@@ -55,7 +55,41 @@ class SetPropertyThroughSetter implements PropertySetterInterface
             );
         }
 
-        $methodReflection->invoke($object, $value);
+        // It's assumed that setters have only one parameter
+        $parametersReflections = $methodReflection->getParameters();
+        if (count($parametersReflections) !== 1) {
+            throw new PropertySetterException('Setters must have one parameter.');
+        }
+
+        $parameterReflection = array_shift($parametersReflections);
+        if (!$parameterReflection->hasType() || $value === null && $parameterReflection->allowsNull()) {
+            $methodReflection->invoke($object, $value);
+
+            return;
+        }
+
+        $parameterType = $parameterReflection->getType()->getName();
+        $valueType = is_object($value) ? get_class($value) : gettype($value);
+        if ($valueType == $parameterType) {
+            $methodReflection->invoke($object, $value);
+
+            return;
+        }
+
+        if ($this->buildersContainer !== null && $this->buildersContainer->has($parameterType)) {
+            $builder = $this->buildersContainer->get($parameterType);
+            $methodReflection->invoke($object, $builder->build($value, $this->buildersContainer));
+
+            return;
+        }
+
+        throw new PropertySetterException(
+            sprintf(
+                'Cannot set property "%s" of the class "%s"',
+                $propertyName,
+                $objectReflection->getName()
+            )
+        );
     }
 
     public function canSet(\ReflectionClass $objectReflection, string $propertyName, $value): bool
