@@ -10,28 +10,9 @@ namespace SilenceDis\ObjectBuilder\PropertySetter;
 class SetPropertyDirectly implements PropertySetterInterface
 {
     /**
-     * @var object
+     * @inheritDoc
      */
-    private $object;
-    /**
-     * @var \ReflectionProperty
-     */
-    private $propertyReflection;
-    /**
-     * @var mixed
-     */
-    private $value;
-
-    /**
-     * SetPropertyDirectly constructor.
-     *
-     * @param $object
-     * @param string $property
-     * @param $value
-     * @throws \TypeError
-     * @throws PropertySetterException
-     */
-    public function __construct($object, string $property, $value)
+    public function set($object, string $propertyName, $value): void
     {
         if (!is_object($object)) {
             throw new \TypeError(
@@ -44,33 +25,32 @@ class SetPropertyDirectly implements PropertySetterInterface
         }
 
         $objectReflection = new \ReflectionClass($object);
-        if (!$objectReflection->hasProperty($property)) {
+        if (!$objectReflection->hasProperty($propertyName)) {
             throw new PropertySetterException(
-                sprintf('The property "%s" doesn\'t exist in %s', $property, get_class($object))
+                sprintf('The property "%s" doesn\'t exist in %s', $propertyName, get_class($object))
             );
         }
-        $propertyReflection = $objectReflection->getProperty($property);
+        $propertyReflection = $objectReflection->getProperty($propertyName);
         if (!$propertyReflection->isPublic()) {
             throw new PropertySetterException(
                 sprintf('The property %s must be accessible to set it directly.', $propertyReflection->getName())
             );
         }
 
-        $this->object = $object;
-        $this->propertyReflection = $propertyReflection;
-        $this->value = $value;
+        $propertyReflection->setValue($object, $value);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function set(): void
+    public function canSet(\ReflectionClass $objectReflection, string $propertyName, $value): bool
     {
-        $this->propertyReflection->setValue($this->object, $this->value);
-    }
+        if (!$objectReflection->hasProperty($propertyName)) {
+            return false;
+        }
 
-    public function canSet(\ReflectionClass $objectReflection, string $propertyName): bool
-    {
-        // TODO: Implement canSet() method.
+        $propertyReflection = $objectReflection->getProperty($propertyName);
+        if (!$propertyReflection->isPublic()) {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -2,6 +2,8 @@
 
 namespace SilenceDis\ObjectBuilder\PropertySetter;
 
+use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
+
 /**
  * Class SetPropertyThroughSetter
  *
@@ -10,29 +12,24 @@ namespace SilenceDis\ObjectBuilder\PropertySetter;
 class SetPropertyThroughSetter implements PropertySetterInterface
 {
     /**
-     * @var object
+     * @var BuildersContainerInterface
      */
-    private $object;
-    /**
-     * @var \ReflectionMethod
-     */
-    private $methodReflection;
-    /**
-     * @var mixed
-     */
-    private $value;
+    private $buildersContainer;
 
     /**
      * SetPropertyThroughSetter constructor.
      *
-     * @param object $object
-     * @param string $propertyName
-     * @param mixed $value
-     *
-     * @throws PropertySetterException
-     * @throws \TypeError
+     * @param BuildersContainerInterface $buildersContainer
      */
-    public function __construct($object, string $propertyName, $value)
+    public function __construct(BuildersContainerInterface $buildersContainer)
+    {
+        $this->buildersContainer = $buildersContainer;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function set($object, string $propertyName, $value): void
     {
         if (!is_object($object)) {
             throw new \TypeError(
@@ -45,31 +42,65 @@ class SetPropertyThroughSetter implements PropertySetterInterface
         }
 
         $objectReflection = new \ReflectionClass($object);
-        $methodName = sprintf('set%s', ucfirst($propertyName));
-        if (!$objectReflection->hasMethod($methodName)) {
+        $setterMethodName = $this->getSetterMethodName($propertyName);
+        if (!$objectReflection->hasMethod($setterMethodName)) {
             throw new PropertySetterException(
-                sprintf('The method "%s" doesn\'t exist in %s', $methodName, get_class($object))
+                sprintf('The method "%s" doesn\'t exist in %s', $setterMethodName, get_class($object))
             );
         }
-        $methodReflection = $objectReflection->getMethod($methodName);
+        $methodReflection = $objectReflection->getMethod($setterMethodName);
         if (!$methodReflection->isPublic()) {
             throw new PropertySetterException(
                 sprintf('The method %s must be accessible to set the property using it.', $methodReflection->getName())
             );
         }
 
-        $this->object = $object;
-        $this->methodReflection = $methodReflection;
-        $this->value = $value;
+        $methodReflection->invoke($object, $value);
     }
 
-    public function set(): void
+    public function canSet(\ReflectionClass $objectReflection, string $propertyName, $value): bool
     {
-        $this->methodReflection->invoke($this->object, $this->value);
+        $setterMethodName = $this->getSetterMethodName($propertyName);
+
+        if (!$objectReflection->hasMethod($setterMethodName)) {
+            return false;
+        }
+
+        $methodReflection = $objectReflection->getMethod($setterMethodName);
+        if (!$methodReflection->isPublic()) {
+            return false;
+        }
+
+        // It's assumed that setters have only one parameter
+        $parametersReflections = $methodReflection->getParameters();
+        if (count($parametersReflections) !== 1) {
+            return false;
+        }
+
+        $parameterReflection = array_shift($parametersReflections);
+        if (!$parameterReflection->hasType() || $value === null && $parameterReflection->allowsNull()) {
+            return true;
+        }
+
+        $parameterType = $parameterReflection->getType()->getName();
+        $valueType = is_object($value) ? get_class($value) : gettype($value);
+        if ($valueType == $parameterType) {
+            return true;
+        }
+
+        if ($this->buildersContainer !== null && $this->buildersContainer->has($parameterType)) {
+            return true;
+        }
+
+        return false;
     }
 
-    public function canSet(\ReflectionClass $objectReflection, string $propertyName): bool
+    /**
+     * @param string $propertyName
+     * @return string
+     */
+    protected function getSetterMethodName(string $propertyName)
     {
-        // TODO: Implement canSet() method.
+        return sprintf('set%s', ucfirst($propertyName));
     }
 }

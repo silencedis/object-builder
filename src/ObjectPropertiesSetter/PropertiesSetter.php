@@ -58,14 +58,16 @@ class PropertiesSetter implements PropertiesSetterInterface
      *
      * @throws PropertiesSetterException
      * @throws \SilenceDis\ObjectBuilder\BuildersContainer\BuilderNotFoundExceptionInterface
+     * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterException
+     * @throws \TypeError
      */
     public function set(string $property, $value): void
     {
         if ($this->objectReflection->hasProperty($property)) {
             $propertyReflection = $this->objectReflection->getProperty($property);
             if ($propertyReflection->isPublic()) {
-                $propertySetter = new SetPropertyDirectly($this->object, $property, $value);
-                $propertySetter->set();
+                $propertySetter = new SetPropertyDirectly();
+                $propertySetter->set($this->object, $property, $value);
 
                 return;
             }

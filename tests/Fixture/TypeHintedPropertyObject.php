@@ -12,4 +12,8 @@ class TypeHintedPropertyObject
     public function setFoo(\stdClass $value)
     {
     }
+
+    public function setBar(ExampleInterface $value)
+    {
+    }
 }

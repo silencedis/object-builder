@@ -14,12 +14,21 @@ interface PropertySetterInterface
      *
      * @param \ReflectionClass $objectReflection
      * @param string $propertyName
+     * @param mixed $value
+     *
      * @return mixed
      */
-    public function canSet(\ReflectionClass $objectReflection, string $propertyName): bool;
+    public function canSet(\ReflectionClass $objectReflection, string $propertyName, $value): bool;
 
     /**
+     * Sets the value
+     *
+     * @param object $object An object, the property of which must be set
+     * @param string $propertyName A property which must be set
+     * @param mixed $value A value
+     *
+     * @throws \TypeError
      * @throws PropertySetterExceptionInterface
      */
-    public function set(): void;
+    public function set($object, string $propertyName, $value): void;
 }
