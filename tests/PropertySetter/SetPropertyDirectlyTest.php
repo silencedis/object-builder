@@ -16,7 +16,7 @@ class SetPropertyDirectlyTest extends TestCase
     /**
      * If the `object` constructor argument is not object, the TypeError exception will be thrown.
      *
-     * @covers       \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly::__construct
+     * @covers       \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly::set
      * @dataProvider dataInvalidObjectValues
      * @param $invalidObjectValue
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterException
@@ -45,7 +45,7 @@ class SetPropertyDirectlyTest extends TestCase
     /**
      * If the property doesn't exist in the object, the PropertySetterException must be thrown.
      *
-     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly::__construct
+     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly::set
      *
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterException
      * @throws \TypeError
@@ -63,7 +63,7 @@ class SetPropertyDirectlyTest extends TestCase
     /**
      * If the property is not public, the PropertySetterException must be thrown.
      *
-     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly::__construct
+     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly::set
      *
      * @throws \TypeError
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterException
