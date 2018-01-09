@@ -20,6 +20,10 @@ class ObjectsCollectionBuilder implements BuilderInterface
      * @var string
      */
     private $collectionItemType;
+    /**
+     * @var BuildersContainerInterface
+     */
+    private $buildersContainer;
 
     /**
      * ObjectsCollectionBuilder constructor.
@@ -28,10 +32,13 @@ class ObjectsCollectionBuilder implements BuilderInterface
      * @param ObjectsCollectionInterface $collectionPrototype
      * @param string $collectionItemType
      *
-     * @throws \TypeError
+     * @param BuildersContainerInterface $buildersContainer
      */
-    public function __construct(ObjectsCollectionInterface $collectionPrototype, string $collectionItemType)
-    {
+    public function __construct(
+        ObjectsCollectionInterface $collectionPrototype,
+        string $collectionItemType,
+        BuildersContainerInterface $buildersContainer
+    ) {
         if (is_object($collectionPrototype)) {
             $collectionPrototypeReflection = new \ReflectionClass($collectionPrototype);
             if (!$collectionPrototypeReflection->isCloneable()) {
@@ -47,12 +54,13 @@ class ObjectsCollectionBuilder implements BuilderInterface
 
         $this->collectionPrototype = $collectionPrototype;
         $this->collectionItemType = $collectionItemType;
+        $this->buildersContainer = $buildersContainer;
     }
 
     /**
      * @inheritDoc
      */
-    public function build($rawData, BuildersContainerInterface $objectBuildersContainer)
+    public function build($rawData)
     {
         if (!is_iterable($rawData)) {
             return new \TypeError(
@@ -65,7 +73,7 @@ class ObjectsCollectionBuilder implements BuilderInterface
             );
         }
 
-        if (!$objectBuildersContainer->has($this->collectionItemType)) {
+        if (!$this->buildersContainer->has($this->collectionItemType)) {
             throw new BuilderException(
                 sprintf(
                     'Cannot create an instance of %s. The object builders container doesn\'t have suitable object builder.',
@@ -73,11 +81,11 @@ class ObjectsCollectionBuilder implements BuilderInterface
                 )
             );
         }
-        $collectionItemBuilder = $objectBuildersContainer->get($this->collectionItemType);
+        $collectionItemBuilder = $this->buildersContainer->get($this->collectionItemType);
         $collection = clone $this->collectionPrototype;
 
         foreach ($rawData as $key => $value) {
-            $collectionItem = $collectionItemBuilder->build($value, $objectBuildersContainer);
+            $collectionItem = $collectionItemBuilder->build($value);
             if (!$collection->isAllowed($collectionItem)) {
                 throw new BuilderException(
                     sprintf(

@@ -2,8 +2,6 @@
 
 namespace SilenceDis\ObjectBuilder\Builder;
 
-use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
-
 /**
  * Class DateTimeBuilder
  *
@@ -11,7 +9,7 @@ use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
  */
 class DateTimeBuilder implements BuilderInterface
 {
-    public function build($rawData, BuildersContainerInterface $objectBuildersContainer): \DateTime
+    public function build($rawData): \DateTime
     {
         return new \DateTime($rawData);
     }

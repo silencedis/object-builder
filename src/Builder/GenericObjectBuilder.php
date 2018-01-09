@@ -2,10 +2,11 @@
 
 namespace SilenceDis\ObjectBuilder\Builder;
 
-use SilenceDis\ObjectBuilder\BuildersContainer\BuilderNotFoundExceptionInterface;
 use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
-use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterException;
 use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter;
+use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterException;
+use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly;
+use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter;
 
 /**
  * Class GenericObjectBuilder
@@ -18,16 +19,21 @@ class GenericObjectBuilder implements BuilderInterface
      * @var object
      */
     private $objectPrototype;
+    /**
+     * @var BuildersContainerInterface
+     */
+    private $buildersContainer;
 
     /**
      * GenericObjectBuilder constructor.
      *
      * @param object $objectPrototype An object. It will be used as a prototype to create a new instance.
      *                                This is to prevent changing of the original one.
+     * @param BuildersContainerInterface $buildersContainer A builders container
      *
      * @throws \TypeError
      */
-    public function __construct($objectPrototype)
+    public function __construct($objectPrototype, BuildersContainerInterface $buildersContainer)
     {
         if (!is_object($objectPrototype)) {
             throw new \TypeError(
@@ -36,20 +42,25 @@ class GenericObjectBuilder implements BuilderInterface
         }
 
         $this->objectPrototype = $objectPrototype;
+        $this->buildersContainer = $buildersContainer;
     }
 
     /**
      * @param mixed $rawData
-     * @param BuildersContainerInterface $objectBuildersContainer
-     *
      * @return mixed|object
-     * @throws BuilderNotFoundExceptionInterface
+     *
      * @throws PropertiesSetterException
+     * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface
+     * @throws \TypeError
      */
-    public function build($rawData, BuildersContainerInterface $objectBuildersContainer)
+    public function build($rawData)
     {
         $object = clone($this->objectPrototype);
-        $setter = new PropertiesSetter($object, $objectBuildersContainer);
+        $propertySetters = [
+            new SetPropertyDirectly(),
+            new SetPropertyThroughSetter($this->buildersContainer),
+        ];
+        $setter = new PropertiesSetter($object, $propertySetters);
         foreach ($rawData as $propertyName => $rawValue) {
             $setter->set($propertyName, $rawValue);
         }

@@ -2,8 +2,6 @@
 
 namespace SilenceDis\ObjectBuilder\Builder;
 
-use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
-
 /**
  * Class PlainValueBuilder
  *
@@ -11,7 +9,7 @@ use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
  */
 class PlainValueBuilder implements BuilderInterface
 {
-    public function build($rawData, BuildersContainerInterface $objectBuildersContainer)
+    public function build($rawData)
     {
         return $rawData;
     }
