@@ -55,6 +55,16 @@ class GenericObjectBuilder implements BuilderInterface
      */
     public function build($rawData)
     {
+        if (!is_iterable($rawData)) {
+            throw new \TypeError(
+                sprintf(
+                    'The parameter "rawData" of the method %s must be iterable, given %s.',
+                    __METHOD__,
+                    gettype($rawData)
+                )
+            );
+        }
+
         $object = clone($this->objectPrototype);
         $propertySetters = [
             new SetPropertyDirectly(),
