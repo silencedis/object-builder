@@ -134,7 +134,6 @@ class SetPropertyDirectlyTest extends TestCase
         $this->assertEquals($expectedResult, $actualResult);
     }
 
-
     public function dataCanSet()
     {
         return [
@@ -144,6 +143,8 @@ class SetPropertyDirectlyTest extends TestCase
             [new PrivatePropertiesObject(), 'asdf', false],
             // The object has an appropriate public property
             [new PublicPropertiesObject(), 'foo', true],
+            // The property is not public
+            [new PrivatePropertiesObject(), 'foo', false],
         ];
     }
 
