@@ -12,6 +12,8 @@ class PropertyInfoTest extends TestCase
 {
     /**
      * @covers       \SilenceDis\ObjectBuilder\PropertyInfo\PropertyInfo::publicPropertyExists
+     * @covers       \SilenceDis\ObjectBuilder\PropertyInfo\PropertyInfo::__construct
+     *
      * @dataProvider dataPublicPropertyExists
      *
      * @param object $object
@@ -25,6 +27,9 @@ class PropertyInfoTest extends TestCase
         $this->assertTrue($expectedResult === $actualResult);
     }
 
+    /**
+     * @return array
+     */
     public function dataPublicPropertyExists()
     {
         return [
@@ -48,6 +53,8 @@ class PropertyInfoTest extends TestCase
 
     /**
      * @covers       \SilenceDis\ObjectBuilder\PropertyInfo\PropertyInfo::publicSetterExists()
+     * @covers       \SilenceDis\ObjectBuilder\PropertyInfo\PropertyInfo::__construct
+     *
      * @dataProvider dataPublicSetterExists
      *
      * @param $object
@@ -61,6 +68,9 @@ class PropertyInfoTest extends TestCase
         $this->assertTrue($expectedResult === $actualResult);
     }
 
+    /**
+     * @return array
+     */
     public function dataPublicSetterExists()
     {
         return [
@@ -84,6 +94,7 @@ class PropertyInfoTest extends TestCase
 
     /**
      * @covers \SilenceDis\ObjectBuilder\PropertyInfo\PropertyInfo::getObject
+     * @covers \SilenceDis\ObjectBuilder\PropertyInfo\PropertyInfo::__construct
      */
     public function testGetObject()
     {
@@ -96,6 +107,7 @@ class PropertyInfoTest extends TestCase
 
     /**
      * @covers \SilenceDis\ObjectBuilder\PropertyInfo\PropertyInfo::getObjectReflection
+     * @covers \SilenceDis\ObjectBuilder\PropertyInfo\PropertyInfo::__construct
      */
     public function testGetObjectReflection()
     {
