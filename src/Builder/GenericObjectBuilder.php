@@ -2,11 +2,8 @@
 
 namespace SilenceDis\ObjectBuilder\Builder;
 
-use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
-use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter;
 use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterException;
-use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly;
-use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter;
+use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterInterface;
 
 /**
  * Class GenericObjectBuilder
@@ -20,20 +17,19 @@ class GenericObjectBuilder implements BuilderInterface
      */
     private $objectPrototype;
     /**
-     * @var BuildersContainerInterface
+     * @var PropertiesSetterInterface
      */
-    private $buildersContainer;
+    private $propertiesSetter;
 
     /**
      * GenericObjectBuilder constructor.
      *
      * @param object $objectPrototype An object. It will be used as a prototype to create a new instance.
      *                                This is to prevent changing of the original one.
-     * @param BuildersContainerInterface $buildersContainer A builders container
-     *
+     * @param PropertiesSetterInterface $propertiesSetter
      * @throws \TypeError
      */
-    public function __construct($objectPrototype, BuildersContainerInterface $buildersContainer)
+    public function __construct($objectPrototype, PropertiesSetterInterface $propertiesSetter)
     {
         if (!is_object($objectPrototype)) {
             throw new \TypeError(
@@ -42,7 +38,7 @@ class GenericObjectBuilder implements BuilderInterface
         }
 
         $this->objectPrototype = $objectPrototype;
-        $this->buildersContainer = $buildersContainer;
+        $this->propertiesSetter = $propertiesSetter;
     }
 
     /**
@@ -52,6 +48,7 @@ class GenericObjectBuilder implements BuilderInterface
      * @throws PropertiesSetterException
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface
      * @throws \TypeError
+     * @throws \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterExceptionInterface
      */
     public function build($rawData)
     {
@@ -66,13 +63,8 @@ class GenericObjectBuilder implements BuilderInterface
         }
 
         $object = clone($this->objectPrototype);
-        $propertySetters = [
-            new SetPropertyDirectly(),
-            new SetPropertyThroughSetter($this->buildersContainer),
-        ];
-        $setter = new PropertiesSetter($object, $propertySetters);
         foreach ($rawData as $propertyName => $rawValue) {
-            $setter->set($propertyName, $rawValue);
+            $this->propertiesSetter->set($propertyName, $rawValue);
         }
 
         return $object;
