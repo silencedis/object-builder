@@ -4,8 +4,10 @@ namespace SilenceDis\ObjectBuilder\Test\Builder;
 
 use PHPUnit\Framework\TestCase;
 use SilenceDis\ObjectBuilder\Builder\GenericObjectBuilder;
+use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
 use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterInterface;
 use SilenceDis\PHPUnitMockHelper\MockHelper;
+use SilenceDis\ProtectedMembersAccessor\ProtectedMembersAccessor;
 
 class GenericObjectBuilderTest extends TestCase
 {
@@ -27,23 +29,6 @@ class GenericObjectBuilderTest extends TestCase
     }
 
     /**
-     * @param array $mockConfig
-     *
-     * @return \PHPUnit_Framework_MockObject_MockObject|PropertiesSetterInterface
-     *
-     * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
-     */
-    private function getPropertiesSetterMock($mockConfig = [])
-    {
-        return $this->getMockHelper()->mockObject(
-            PropertiesSetterInterface::class,
-            ['mockType' => MockHelper::MOCK_TYPE_ABSTRACT],
-            $mockConfig
-        );
-    }
-
-
-    /**
      * If the "objectPrototype" parameter of the constructor isn't an object,
      * the {@see \TypeError} will be thrown.
      *
@@ -56,9 +41,13 @@ class GenericObjectBuilderTest extends TestCase
      */
     public function testConstructor_1($objectProrotype)
     {
-        $propertiesSetter = $this->getPropertiesSetterMock();
         $this->expectException(\TypeError::class);
-        new GenericObjectBuilder($objectProrotype, $propertiesSetter);
+        /** @var BuildersContainerInterface $buildersContainer */
+        $buildersContainer = (new MockHelper($this))->mockObject(
+            BuildersContainerInterface::class,
+            ['mockType' => MockHelper::MOCK_TYPE_ABSTRACT]
+        );
+        new GenericObjectBuilder($objectProrotype, $buildersContainer);
     }
 
     /**
@@ -84,17 +73,19 @@ class GenericObjectBuilderTest extends TestCase
      *
      * @param $invalidValue
      *
-     * @throws \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterException
      * @throws \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterExceptionInterface
-     * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface
      * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
      * @throws \TypeError
      */
     public function testBuild_1($invalidValue)
     {
         $objectPrototype = new \stdClass();
-        $propertiesSetter = $this->getPropertiesSetterMock();
-        $builder = new GenericObjectBuilder($objectPrototype, $propertiesSetter);
+        /** @var BuildersContainerInterface $buildersContainer */
+        $buildersContainer = $this->getMockHelper()->mockObject(
+            BuildersContainerInterface::class,
+            ['mockType' => MockHelper::MOCK_TYPE_ABSTRACT]
+        );
+        $builder = new GenericObjectBuilder($objectPrototype, $buildersContainer);
 
         $this->expectException(\TypeError::class);
         $builder->build($invalidValue);
@@ -115,24 +106,42 @@ class GenericObjectBuilderTest extends TestCase
     }
 
     /**
-     * @covers \SilenceDis\ObjectBuilder\Builder\GenericObjectBuilder::build
+     * @covers       \SilenceDis\ObjectBuilder\Builder\GenericObjectBuilder::build
      *
-     * @throws \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterException
-     * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface
-     * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
-     * @throws \TypeError
+     * @dataProvider dataRawForBuild
+     *
+     * @param $rawData
+     * @param $expectedCallsNumber
+     *
      * @throws \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterExceptionInterface
+     * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
+     * @throws \SilenceDis\ProtectedMembersAccessor\Exception\ProtectedMembersAccessException
+     * @throws \TypeError
      */
-    public function testBuild_2()
+    public function testBuild_2($rawData, $expectedCallsNumber)
     {
-        $propertiesSetter = $this->getPropertiesSetterMock();
-        $objectPrototype = new \stdClass();
-        $expectedClass = get_class($objectPrototype);
-        $rawData = [];
+        $propertiesSetter = $this->getMockHelper()->mockObject(
+            PropertiesSetterInterface::class,
+            ['mockType' => MockHelper::MOCK_TYPE_ABSTRACT]
+        );
 
-        $builder = new GenericObjectBuilder($objectPrototype, $propertiesSetter);
-        $result = $builder->build($rawData);
-        $this->assertInstanceOf($expectedClass, $result);
+        /** @var \PHPUnit_Framework_MockObject_MockObject|GenericObjectBuilder $builder */
+        $builder = $this->getMockHelper()->mockObject(
+            GenericObjectBuilder::class,
+            [
+                'methods' => [
+                    'createPropertiesSetter' => $propertiesSetter,
+                ],
+            ]
+        );
+        (new ProtectedMembersAccessor())->setProtectedProperty(
+            GenericObjectBuilder::class,
+            $builder,
+            'objectPrototype',
+            new \stdClass()
+        );
+        $propertiesSetter->expects($this->exactly($expectedCallsNumber))->method('set');
+        $builder->build($rawData);
     }
 
     /**
@@ -157,29 +166,44 @@ class GenericObjectBuilderTest extends TestCase
     }
 
     /**
-     * @covers       \SilenceDis\ObjectBuilder\Builder\GenericObjectBuilder::build
+     * @covers \SilenceDis\ObjectBuilder\Builder\GenericObjectBuilder::build
      *
-     * @dataProvider dataRawForBuild
-     *
-     * @param $rawData
-     * @param $expectedCallsNumber
-     *
-     * @throws \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterException
      * @throws \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterExceptionInterface
-     * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface
      * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
      * @throws \TypeError
      */
-    public function testBuild_3($rawData, $expectedCallsNumber)
+    public function testBuild_3()
     {
-        $propertiesSetter = $this->getPropertiesSetterMock(['methods' => ['set']]);
         $objectPrototype = new \stdClass();
         $expectedClass = get_class($objectPrototype);
+        $rawData = [];
+        /** @var BuildersContainerInterface $buildersContainer */
+        $buildersContainer = $this->getMockHelper()->mockObject(
+            BuildersContainerInterface::class,
+            ['mockType' => MockHelper::MOCK_TYPE_ABSTRACT]
+        );
 
-        $propertiesSetter->expects($this->exactly($expectedCallsNumber))->method('set');
-
-        $builder = new GenericObjectBuilder($objectPrototype, $propertiesSetter);
+        $builder = new GenericObjectBuilder($objectPrototype, $buildersContainer);
         $result = $builder->build($rawData);
+        $this->assertInstanceOf($expectedClass, $result);
+    }
+
+    /**
+     * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
+     * @throws \SilenceDis\ProtectedMembersAccessor\Exception\ProtectedMembersAccessException
+     */
+    public function testCreatePropertiesSetter()
+    {
+        $objectPrototype = new \stdClass();
+        $expectedClass = PropertiesSetterInterface::class;
+        /** @var BuildersContainerInterface $buildersContainer */
+        $buildersContainer = $this->getMockHelper()->mockObject(
+            BuildersContainerInterface::class,
+            ['mockType' => MockHelper::MOCK_TYPE_ABSTRACT]
+        );
+        $builder = new GenericObjectBuilder($objectPrototype, $buildersContainer);
+        $closure = (new ProtectedMembersAccessor())->getProtectedMethod($builder, 'createPropertiesSetter');
+        $result = $closure(clone($objectPrototype));
         $this->assertInstanceOf($expectedClass, $result);
     }
 }
