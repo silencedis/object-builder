@@ -27,6 +27,44 @@ class GenericObjectBuilderTest extends TestCase
     }
 
     /**
+     * If the "objectPrototype" parameter of the constructor isn't an object,
+     * the {@see \TypeError} will be thrown.
+     *
+     * @covers       \SilenceDis\ObjectBuilder\Builder\GenericObjectBuilder::__construct
+     *
+     * @dataProvider dataInvalidObjectPrototypes
+     *
+     * @param mixed $objectProrotype
+     * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
+     */
+    public function testConstructor_1($objectProrotype)
+    {
+        $this->expectException(\TypeError::class);
+        /** @var BuildersContainerInterface $buildersContainer */
+        $buildersContainer = (new MockHelper($this))->mockObject(
+            BuildersContainerInterface::class,
+            ['mockType' => MockHelper::MOCK_TYPE_ABSTRACT]
+        );
+        new GenericObjectBuilder($objectProrotype, $buildersContainer);
+    }
+
+    /**
+     * @return array
+     */
+    public function dataInvalidObjectPrototypes()
+    {
+        return [
+            ['string'],
+            [1],
+            [1.1],
+            [null],
+            [true],
+            [false],
+            [[]],
+        ];
+    }
+
+    /**
      * The parameter "rawData" of the method "build" must be an array
      *
      * @dataProvider dataInvalidBuildParameters
@@ -52,6 +90,9 @@ class GenericObjectBuilderTest extends TestCase
         $builder->build($invalidValue);
     }
 
+    /**
+     * @return array
+     */
     public function dataInvalidBuildParameters()
     {
         return [
@@ -61,5 +102,20 @@ class GenericObjectBuilderTest extends TestCase
             [new \stdClass()],
             ['string'],
         ];
+    }
+
+    /**
+     * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
+     */
+    public function testBuild_2()
+    {
+        $buildersContainer = (new MockHelper($this))->mockObject(
+            BuildersContainerInterface::class,
+            ['mockType' => MockHelper::MOCK_TYPE_ABSTRACT]
+        );
+        $objectPrototype = 
+        $rawData = [];
+
+        $builder = new GenericObjectBuilder()
     }
 }
