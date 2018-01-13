@@ -55,6 +55,68 @@ class PropertiesSetterTest extends TestCase
     }
 
     /**
+     * If the "object" parameter isn't an object, the {@see \TypeError} will be thown.
+     *
+     * @covers       \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter::__construct
+     *
+     * @dataProvider dataInvalidObjects
+     *
+     * @param mixed $object
+     */
+    public function testConstructor_1($object)
+    {
+        $this->expectException(\TypeError::class);
+        new PropertiesSetter($object, []);
+    }
+
+    /**
+     * @return array
+     */
+    public function dataInvalidObjects()
+    {
+        return [
+            ['string'],
+            [1],
+            [1.1],
+            [null],
+            [false],
+            [true],
+        ];
+    }
+
+    /**
+     * If at least one of property setters is invalid,
+     * the {@see \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterExceptionInterface} will be thrown.
+     *
+     * @covers       \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter::__construct
+     *
+     * @dataProvider dataInvalidPropertySetters
+     *
+     * @param $propertySetters
+     */
+    public function testConstructor_2($propertySetters)
+    {
+        $this->expectException(PropertiesSetterExceptionInterface::class);
+        new PropertiesSetter(new \stdClass, $propertySetters);
+    }
+
+    /**
+     * @return array
+     * @throws InvalidMockTypeException
+     */
+    public function dataInvalidPropertySetters()
+    {
+        $mockHelper = new MockHelper($this);
+        $validPropertySetter = $mockHelper->mockObject(SetPropertyDirectly::class, ['constructor' => false]);
+        $invalidPropertySetter = \stdClass::class;
+
+        return [
+            [[$validPropertySetter, $invalidPropertySetter]],
+            [[$invalidPropertySetter, $validPropertySetter]],
+        ];
+    }
+
+    /**
      * Set non-marked public property.
      *
      * @covers       \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter::set
