@@ -63,7 +63,7 @@ class ObjectsCollectionBuilder implements BuilderInterface
     public function build($rawData)
     {
         if (!is_iterable($rawData)) {
-            return new \TypeError(
+            throw new \TypeError(
                 sprintf(
                     'The parameter "%s" of the method "%s" must be iterable, given "%s"',
                     'rawData',
@@ -95,6 +95,7 @@ class ObjectsCollectionBuilder implements BuilderInterface
                     )
                 );
             }
+            $collection[] = $collectionItem;
         }
 
         return $collection;
