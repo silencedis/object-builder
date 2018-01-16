@@ -4,6 +4,7 @@ namespace SilenceDis\ObjectBuilder\Builder;
 
 use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
 use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter;
+use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterExceptionInterface;
 use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterInterface;
 use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly;
 use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter;
@@ -23,18 +24,26 @@ class GenericObjectBuilder implements BuilderInterface
      * @var BuildersContainerInterface
      */
     private $buildersContainer;
+    /**
+     * @var callable
+     */
+    private $propertiesSetterExceptionHandler;
 
     /**
      * GenericObjectBuilder constructor.
      *
      * @param object $objectPrototype An object. It will be used as a prototype to create a new instance.
-     *                                This is to prevent changing of the original one.
+     *                                                      This is to prevent changing of the original one.
      * @param BuildersContainerInterface $buildersContainer A builders container
+     * @param callable|null $propertiesSetterExceptionHandler
      *
      * @throws \TypeError
      */
-    public function __construct($objectPrototype, BuildersContainerInterface $buildersContainer)
-    {
+    public function __construct(
+        $objectPrototype,
+        BuildersContainerInterface $buildersContainer,
+        callable $propertiesSetterExceptionHandler = null
+    ) {
         if (!is_object($objectPrototype)) {
             throw new \TypeError(
                 sprintf('The property "objectPrototype" must be an object, given "%s"', gettype($objectPrototype))
@@ -43,10 +52,12 @@ class GenericObjectBuilder implements BuilderInterface
 
         $this->objectPrototype = $objectPrototype;
         $this->buildersContainer = $buildersContainer;
+        $this->propertiesSetterExceptionHandler = $propertiesSetterExceptionHandler;
     }
 
     /**
      * @param mixed $rawData
+     *
      * @return mixed|object
      *
      * @throws \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterExceptionInterface
@@ -67,7 +78,15 @@ class GenericObjectBuilder implements BuilderInterface
         $object = clone($this->objectPrototype);
         $setter = $this->createPropertiesSetter($object);
         foreach ($rawData as $propertyName => $rawValue) {
-            $setter->set($propertyName, $rawValue);
+            try {
+                $setter->set($propertyName, $rawValue);
+            } catch (PropertiesSetterExceptionInterface $e) {
+                if ($this->propertiesSetterExceptionHandler === null) {
+                    throw $e;
+                }
+
+                call_user_func($this->propertiesSetterExceptionHandler, $e);
+            }
         }
 
         return $object;

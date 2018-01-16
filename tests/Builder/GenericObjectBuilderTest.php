@@ -5,10 +5,19 @@ namespace SilenceDis\ObjectBuilder\Test\Builder;
 use PHPUnit\Framework\TestCase;
 use SilenceDis\ObjectBuilder\Builder\GenericObjectBuilder;
 use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
+use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterException;
 use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterInterface;
+use SilenceDis\ObjectBuilder\Test\Fixture\ExceptionHandler;
 use SilenceDis\PHPUnitMockHelper\MockHelper;
 use SilenceDis\ProtectedMembersAccessor\ProtectedMembersAccessor;
 
+/**
+ * Class GenericObjectBuilderTest
+ *
+ * @author Yurii Slobodeniuk <silencedis@gmail.com>
+ *
+ * @coversDefaultClass \SilenceDis\ObjectBuilder\Builder\GenericObjectBuilder
+ */
 class GenericObjectBuilderTest extends TestCase
 {
     /**
@@ -32,11 +41,11 @@ class GenericObjectBuilderTest extends TestCase
      * If the "objectPrototype" parameter of the constructor isn't an object,
      * the {@see \TypeError} will be thrown.
      *
-     * @covers       \SilenceDis\ObjectBuilder\Builder\GenericObjectBuilder::__construct
-     *
+     * @covers ::__construct
      * @dataProvider dataInvalidObjectPrototypes
      *
      * @param mixed $objectProrotype
+     *
      * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
      */
     public function testConstructor_1($objectProrotype)
@@ -69,6 +78,8 @@ class GenericObjectBuilderTest extends TestCase
     /**
      * The parameter "rawData" of the method "build" must be an array
      *
+     * @covers ::build
+     * @covers ::__construct
      * @dataProvider dataInvalidBuildParameters
      *
      * @param $invalidValue
@@ -106,8 +117,7 @@ class GenericObjectBuilderTest extends TestCase
     }
 
     /**
-     * @covers       \SilenceDis\ObjectBuilder\Builder\GenericObjectBuilder::build
-     *
+     * @covers       ::build
      * @dataProvider dataRawForBuild
      *
      * @param $rawData
@@ -166,7 +176,8 @@ class GenericObjectBuilderTest extends TestCase
     }
 
     /**
-     * @covers \SilenceDis\ObjectBuilder\Builder\GenericObjectBuilder::build
+     * @covers ::build
+     * @covers ::__construct
      *
      * @throws \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterExceptionInterface
      * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
@@ -189,6 +200,134 @@ class GenericObjectBuilderTest extends TestCase
     }
 
     /**
+     * If the PropertiesSetterExceptionInterface exception is thrown and a properties setter exception handler is set,
+     * the handler will be called.
+     *
+     * @covers ::build
+     * @covers ::__construct
+     * @dataProvider dataForPropertiesExceptionHandlingTesting
+     *
+     * @param PropertiesSetterException $exception
+     * @param PropertiesSetterInterface $propertiesSetter
+     * @param $objectPrototype
+     * @param BuildersContainerInterface $buildersContainer
+     *
+     * @throws \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterExceptionInterface
+     * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
+     * @throws \TypeError
+     */
+    public function testBuild_4(
+        PropertiesSetterException $exception,
+        PropertiesSetterInterface $propertiesSetter,
+        $objectPrototype,
+        BuildersContainerInterface $buildersContainer
+    ) {
+        $exceptionHandler = $this->getMockHelper()->mockObject(ExceptionHandler::class, ['methods' => ['__invoke']]);
+
+        /** @var GenericObjectBuilder $builder */
+        $builder = $this->getMockHelper()->mockObject(
+            GenericObjectBuilder::class,
+            [
+                'constructor' => true,
+                'constructorArgs' => [$objectPrototype, $buildersContainer, $exceptionHandler],
+                'methods' => [
+                    'createPropertiesSetter' => $propertiesSetter,
+                ],
+            ]
+        );
+        // Due to the fact that the rawData array contains only one item
+        // and the method "set" of PropertiesSetter mocked to always throw an exception,
+        // the handler call is expected only once.
+        $rawData = ['foo' => 'bar'];
+        $exceptionHandler->expects($this->once())->method('__invoke')->with($exception);
+        $builder->build($rawData);
+    }
+
+    /**
+     * If the PropertiesSetterExceptionInterface exception is thrown
+     * and a properties setter exception handler is not set through the builder constructor,
+     * the thrown exception will be re-thrown.
+     *
+     * @covers ::build
+     * @covers ::__construct
+     * @dataProvider dataForPropertiesExceptionHandlingTesting
+     *
+     * @param PropertiesSetterException $exception
+     * @param PropertiesSetterInterface $propertiesSetter
+     * @param $objectPrototype
+     * @param BuildersContainerInterface $buildersContainer
+     *
+     * @throws \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterExceptionInterface
+     * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
+     * @throws \TypeError
+     */
+    public function testBuild_5(
+        PropertiesSetterException $exception,
+        PropertiesSetterInterface $propertiesSetter,
+        $objectPrototype,
+        BuildersContainerInterface $buildersContainer
+    ) {
+        /** @var GenericObjectBuilder $builder */
+        $builder = $this->getMockHelper()->mockObject(
+            GenericObjectBuilder::class,
+            [
+                'constructor' => true,
+                'constructorArgs' => [$objectPrototype, $buildersContainer],
+                'methods' => [
+                    'createPropertiesSetter' => $propertiesSetter,
+                ],
+            ]
+        );
+        // Due to the fact that the rawData array contains only one item
+        // and the method "set" of PropertiesSetter mocked to always throw an exception,
+        // the handler call is expected only once.
+        $rawData = ['foo' => 'bar'];
+        $this->expectExceptionObject($exception);
+        $builder->build($rawData);
+    }
+
+    /**
+     * @return array
+     *
+     * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
+     */
+    public function dataForPropertiesExceptionHandlingTesting()
+    {
+        $exception = new PropertiesSetterException();
+
+        $propertiesSetter = $this->getMockHelper()->mockObject(
+            PropertiesSetterInterface::class,
+            [
+                'mockType' => MockHelper::MOCK_TYPE_ABSTRACT,
+                'methods' => ['set'],
+            ]
+        );
+        $propertiesSetter->method('set')->willReturnCallback(
+            function () use ($exception) {
+                throw $exception;
+            }
+        );
+
+        $objectPrototype = new \stdClass();
+        /** @var BuildersContainerInterface $buildersContainer */
+        $buildersContainer = $this->getMockHelper()->mockObject(
+            BuildersContainerInterface::class,
+            ['mockType' => MockHelper::MOCK_TYPE_ABSTRACT]
+        );
+
+        return [
+            [
+                'exception' => $exception,
+                'propertiesSetter' => $propertiesSetter,
+                'objectPrototype' => $objectPrototype,
+                'buildersContainer' => $buildersContainer,
+            ],
+        ];
+    }
+
+    /**
+     * @covers ::createPropertiesSetter
+     *
      * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
      * @throws \SilenceDis\ProtectedMembersAccessor\Exception\ProtectedMembersAccessException
      */
