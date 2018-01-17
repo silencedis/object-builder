@@ -3,6 +3,7 @@
 namespace SilenceDis\ObjectBuilder\Test\PropertySetter;
 
 use PHPUnit\Framework\TestCase;
+use SilenceDis\ObjectBuilder\Builder\BuilderInterface;
 use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
 use SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface;
 use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter;
@@ -14,7 +15,15 @@ use SilenceDis\ObjectBuilder\Test\Fixture\SettersWithNotOneArgumentObject;
 use SilenceDis\ObjectBuilder\Test\Fixture\TypeHintedButNotRequiredPropertyObject;
 use SilenceDis\ObjectBuilder\Test\Fixture\TypeHintedPropertyObject;
 use SilenceDis\PHPUnitMockHelper\MockHelper;
+use SilenceDis\ProtectedMembersAccessor\ProtectedMembersAccessor;
 
+/**
+ * Class SetPropertyThroughSetterTest
+ *
+ * @author Yurii Slobodeniuk <silencedis@gmail.com>
+ *
+ * @coversDefaultClass \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter
+ */
 class SetPropertyThroughSetterTest extends TestCase
 {
     /**
@@ -29,7 +38,8 @@ class SetPropertyThroughSetterTest extends TestCase
             BuildersContainerInterface::class,
             [
                 'mockType' => MockHelper::MOCK_TYPE_ABSTRACT,
-            ]
+            ],
+            $mockConfig
         );
     }
 
@@ -38,9 +48,9 @@ class SetPropertyThroughSetterTest extends TestCase
     /**
      * If the `object` constructor argument is not object, the TypeError exception will be thrown.
      *
-     * @covers       \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter::__construct
-     *
+     * @covers ::__construct
      * @dataProvider dataInvalidObjectValues
+     *
      * @param $invalidObjectValue
      *
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterException
@@ -68,9 +78,9 @@ class SetPropertyThroughSetterTest extends TestCase
     }
 
     /**
-     * If the property doesn't exist in the object, the PropertySetterException must be thrown.
+     * If the method doesn't exist in the object, the PropertySetterException must be thrown.
      *
-     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter::__construct
+     * @covers ::__construct
      *
      * @throws \TypeError
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterException
@@ -87,9 +97,9 @@ class SetPropertyThroughSetterTest extends TestCase
     }
 
     /**
-     * If the property is not public, the PropertySetterException must be thrown.
+     * If the method is not public, the PropertySetterException must be thrown.
      *
-     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter::__construct
+     * @covers ::__construct
      *
      * @throws \TypeError
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterException
@@ -106,9 +116,9 @@ class SetPropertyThroughSetterTest extends TestCase
     }
 
     /**
-     * If the value is valid and the property is public, it must be set correctly.
+     * If the value is valid and the method is public, it must be set correctly.
      *
-     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter::set
+     * @covers ::set
      *
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterException
      * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
@@ -135,11 +145,12 @@ class SetPropertyThroughSetterTest extends TestCase
     /**
      * If the "object" variable isn't an object, the TypeError exception will be thrown.
      *
-     * @covers       \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter::set
+     * @covers ::set
      *
      * @dataProvider dataInvalidObjects
      *
      * @param $object
+     *
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterException
      * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
      * @throws \TypeError
@@ -174,7 +185,7 @@ class SetPropertyThroughSetterTest extends TestCase
      * The {@see \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface} exception
      * will be thrown, if cannot set the property.
      *
-     * @covers       \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter::set
+     * @covers ::set
      *
      * @dataProvider dataNotSettable
      *
@@ -211,7 +222,8 @@ class SetPropertyThroughSetterTest extends TestCase
      * the exception {@see \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface}
      * will be thrown.
      *
-     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter::set
+     * @covers ::set
+     *
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterException
      * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
      * @throws \TypeError
@@ -230,10 +242,52 @@ class SetPropertyThroughSetterTest extends TestCase
     }
 
     /**
+     * If all parameters are correct and the appropriate builder exists in the builders container,
+     * the appropriate builder must be used to build a value
+     * and it's result must be passed to the property setter method.
+     *
+     * @covers ::set
+     *
+     * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterException
+     * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
+     * @throws \TypeError
+     */
+    public function testSet_7_1()
+    {
+        $object = (new MockHelper($this))->mockObject(TypeHintedPropertyObject::class, ['methods' => ['setFoo']]);
+        $propertyName = 'foo';
+        $value = [];
+
+        $buildResult = new \stdClass();
+        $builder = (new MockHelper($this))->mockObject(
+            BuilderInterface::class,
+            [
+                'mockType' => MockHelper::MOCK_TYPE_ABSTRACT,
+                'methods' => [
+                    'build' => $buildResult,
+                ],
+            ]
+        );
+
+        $buildersContainer = $this->getBuildersContainerMock(
+            [
+                'methods' => [
+                    'has' => true,
+                    'get' => $builder,
+                ],
+            ]
+        );
+        $setter = new SetPropertyThroughSetter($buildersContainer);
+
+        $object->expects($this->once())->method('setFoo')->with($buildResult);
+        $setter->set($object, $propertyName, $value);
+    }
+
+    /**
      * If the value type mathes with the type hint of parameter of setter,
      * this value will be set without any processing.
      *
-     * @covers \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter::set
+     * @covers ::set
      *
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterException
      * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
@@ -261,6 +315,7 @@ class SetPropertyThroughSetterTest extends TestCase
      * The method "canSet" returns a boolean.
      * @covers       \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly::canSet
      * @dataProvider dataCanSet
+     *
      * @param $object
      * @param $propertyName
      * @param $expectedResult
@@ -275,7 +330,7 @@ class SetPropertyThroughSetterTest extends TestCase
     }
 
     /**
-     * @covers       \SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter::canSet
+     * @covers ::canSet
      * @dataProvider dataCanSet
      *
      * @param $object
@@ -324,6 +379,41 @@ class SetPropertyThroughSetterTest extends TestCase
             [new SettersWithNotOneArgumentObject(), 'foo', null, false],
             // The setter has more than one parameter
             [new SettersWithNotOneArgumentObject(), 'bar', null, false],
+        ];
+    }
+
+    # endregion
+
+    # region getSetterMethodName
+
+    /**
+     * @covers ::getSetterMethodName
+     * @dataProvider dataGetSetterMethodName
+     *
+     * @param string $propertyName
+     * @param string $expectedResult
+     *
+     * @throws \SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException
+     * @throws \SilenceDis\ProtectedMembersAccessor\Exception\ProtectedMembersAccessException
+     */
+    public function testGetSetterMethodName($propertyName, $expectedResult)
+    {
+        $setter = (new MockHelper($this))->mockObject(SetPropertyThroughSetter::class, ['constructor' => false]);
+        $closure = (new ProtectedMembersAccessor())->getProtectedMethod($setter, 'getSetterMethodName');
+        $actualResult = $closure($propertyName);
+        $this->assertEquals($expectedResult, $actualResult);
+    }
+
+    /**
+     * @return array
+     */
+    public function dataGetSetterMethodName()
+    {
+        return [
+            ['foo', 'setFoo'],
+            ['fooBar', 'setFooBar'],
+            ['foo_bar', 'setFoo_bar'],
+            ['FooBar', 'setFooBar'],
         ];
     }
 

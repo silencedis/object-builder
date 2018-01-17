@@ -8,6 +8,7 @@ use SilenceDis\ObjectBuilder\BuildersContainer\BuildersContainerInterface;
 use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter;
 use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterException;
 use SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterExceptionInterface;
+use SilenceDis\ObjectBuilder\PropertySetter\PropertySetterInterface;
 use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyDirectly;
 use SilenceDis\ObjectBuilder\PropertySetter\SetPropertyThroughSetter;
 use SilenceDis\ObjectBuilder\Test\Fixture\PrivatePropertiesObject;
@@ -20,11 +21,37 @@ use SilenceDis\ObjectBuilder\Test\Fixture\TypeHintedPropertyObject;
 use SilenceDis\PHPUnitMockHelper\Exception\InvalidMockTypeException;
 use SilenceDis\PHPUnitMockHelper\MockHelper;
 
+/**
+ * Class PropertiesSetterTest
+ *
+ * @author Yurii Slobodeniuk <silencedis@gmail.com>
+ *
+ * @coversDefaultClass \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter
+ */
 class PropertiesSetterTest extends TestCase
 {
     /**
+     * @var MockHelper
+     */
+    private $mockHelper = null;
+
+    /**
+     * @return MockHelper
+     */
+    private function getMockHelper()
+    {
+        if ($this->mockHelper === null) {
+            $this->mockHelper = new MockHelper($this);
+        }
+
+        return $this->mockHelper;
+    }
+
+    /**
      * @param array $mockConfig
+     *
      * @return \PHPUnit_Framework_MockObject_MockObject|BuildersContainerInterface
+     *
      * @throws InvalidMockTypeException
      */
     private function getBuildersContainerMock($mockConfig = [])
@@ -42,6 +69,7 @@ class PropertiesSetterTest extends TestCase
 
     /**
      * @return array
+     *
      * @throws InvalidMockTypeException
      */
     private function getPropertySetters()
@@ -57,8 +85,7 @@ class PropertiesSetterTest extends TestCase
     /**
      * If the "object" parameter isn't an object, the {@see \TypeError} will be thown.
      *
-     * @covers       \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter::__construct
-     *
+     * @covers ::__construct
      * @dataProvider dataInvalidObjects
      *
      * @param mixed $object
@@ -88,8 +115,7 @@ class PropertiesSetterTest extends TestCase
      * If at least one of property setters is invalid,
      * the {@see \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterExceptionInterface} will be thrown.
      *
-     * @covers       \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter::__construct
-     *
+     * @covers ::__construct
      * @dataProvider dataInvalidPropertySetters
      *
      * @param $propertySetters
@@ -102,6 +128,7 @@ class PropertiesSetterTest extends TestCase
 
     /**
      * @return array
+     *
      * @throws InvalidMockTypeException
      */
     public function dataInvalidPropertySetters()
@@ -119,10 +146,12 @@ class PropertiesSetterTest extends TestCase
     /**
      * Set non-marked public property.
      *
-     * @covers       \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter::set
-     *
+     * @covers ::set
+     * @covers ::__construct
      * @dataProvider dataSetNonMarkedPublicProperty
+     *
      * @param $value
+     *
      * @throws InvalidMockTypeException
      * @throws PropertiesSetterException
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface
@@ -157,7 +186,9 @@ class PropertiesSetterTest extends TestCase
     /**
      * When the property is private and a setter exists, the setter must be called.
      *
-     * @covers \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter::set
+     * @covers ::set
+     * @covers ::__construct
+     *
      * @throws InvalidMockTypeException
      * @throws PropertiesSetterException
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface
@@ -185,7 +216,9 @@ class PropertiesSetterTest extends TestCase
      * If the property is public and the public setter exists, the setter won't be used.
      * The property will be set directly.
      *
-     * @covers \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter::set
+     * @covers ::set
+     * @covers ::__construct
+     *
      * @throws InvalidMockTypeException
      * @throws PropertiesSetterException
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface
@@ -212,7 +245,8 @@ class PropertiesSetterTest extends TestCase
     /**
      * If the property and its setter are private, the exception must be thrown.
      *
-     * @covers \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter::set
+     * @covers ::set
+     * @covers ::__construct
      *
      * @throws InvalidMockTypeException
      * @throws PropertiesSetterException
@@ -240,7 +274,8 @@ class PropertiesSetterTest extends TestCase
     /**
      * If the setter doesn't have any arguments, the exception must be thrown.
      *
-     * @covers \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter::set
+     * @covers ::set
+     * @covers ::__construct
      *
      * @throws InvalidMockTypeException
      * @throws PropertiesSetterException
@@ -262,7 +297,8 @@ class PropertiesSetterTest extends TestCase
     /**
      * If the setter have more than one argument, the exception must be thrown.
      *
-     * @covers \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter::set
+     * @covers ::set
+     * @covers ::__construct
      *
      * @throws InvalidMockTypeException
      * @throws PropertiesSetterException
@@ -285,7 +321,9 @@ class PropertiesSetterTest extends TestCase
      * If the argument of setter is type-hinted but the `null` value is allowed,
      * the `null` value will be set.
      *
-     * @covers \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter::set
+     * @covers ::set
+     * @covers ::__construct
+     *
      * @throws InvalidMockTypeException
      * @throws PropertiesSetterException
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface
@@ -314,7 +352,9 @@ class PropertiesSetterTest extends TestCase
      * the value will be passed to the setter as is.
      * Any object builder won't be used.
      *
-     * @covers \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetter::set
+     * @covers ::set
+     * @covers ::__construct
+     *
      * @throws InvalidMockTypeException
      * @throws PropertiesSetterException
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface
@@ -349,6 +389,9 @@ class PropertiesSetterTest extends TestCase
     }
 
     /**
+     * @covers ::set
+     * @covers ::__construct
+     *
      * @throws InvalidMockTypeException
      * @throws PropertiesSetterException
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface
@@ -398,6 +441,9 @@ class PropertiesSetterTest extends TestCase
     }
 
     /**
+     * @covers ::set
+     * @covers ::__construct
+     *
      * @throws InvalidMockTypeException
      * @throws PropertiesSetterException
      * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface
@@ -444,5 +490,114 @@ class PropertiesSetterTest extends TestCase
         $this->expectException(PropertiesSetterExceptionInterface::class);
 
         $setter->set($testPropertyName, $testPropertyValue);
+    }
+
+    /**
+     * @covers ::set
+     * @covers ::throwPropertiesSetterException
+     * @dataProvider dataAppropriateExceptions
+     *
+     * @param $testException
+     *
+     * @throws InvalidMockTypeException
+     * @throws \SilenceDis\ObjectBuilder\PropertySetter\PropertySetterExceptionInterface
+     * @throws \TypeError
+     */
+    public function testSet_11($testException)
+    {
+        $setter = $this->prepareSetterForExceptionHandlingTests($testException);
+
+        try {
+            // The propertyName and value don't matter in this test
+            $setter->set('foo', 'bar');
+        } catch (PropertiesSetterException $e) {
+            $this->assertTrue($e->getPrevious() === $testException);
+
+            return;
+        }
+
+        $this->fail();
+    }
+
+    /**
+     * @return array
+     */
+    public function dataAppropriateExceptions()
+    {
+        return [
+            [new \Exception()],
+            [new \TypeError()],
+        ];
+    }
+
+    /**
+     * All the rest exception won't be intercepted
+     *
+     * @covers ::set
+     * @dataProvider dataNotAppropriateExceptions
+     *
+     * @param $testException
+     *
+     * @throws InvalidMockTypeException
+     */
+    public function testSet_12($testException)
+    {
+        $setter = $this->prepareSetterForExceptionHandlingTests($testException);
+        try {
+            // The propertyName and value don't matter in this test
+            $setter->set('foo', 'bar');
+        } catch (\Throwable $e) {
+            $this->assertTrue($e === $testException);
+
+            return;
+        }
+
+        // If any exception wasn't catched, the test is considered as failed
+        $this->fail();
+    }
+
+    /**
+     * @return array
+     */
+    public function dataNotAppropriateExceptions()
+    {
+        return [
+            [new \Error()],
+            [new \ParseError()],
+        ];
+    }
+
+    /**
+     * @param \Throwable $testException
+     *
+     * @return PropertiesSetter
+     *
+     * @throws InvalidMockTypeException
+     */
+    private function prepareSetterForExceptionHandlingTests($testException)
+    {
+        $object = new \stdClass();
+        $propertySetter = $this->getMockHelper()->mockObject(
+            PropertySetterInterface::class,
+            [
+                'mockType' => MockHelper::MOCK_TYPE_ABSTRACT,
+                'methods' => [
+                    'canSet' => true,
+                    'set',
+                ],
+                'will' => [
+                    'set' => $this->returnCallback(
+                        function () use ($testException) {
+                            throw $testException;
+                        }
+                    ),
+                ],
+            ]
+        );
+        // The propertySetters array contains only one item - mocked property setter
+        // to ensure that all will wark expectedly
+        $setter = new PropertiesSetter($object, [$propertySetter]);
+
+        return $setter;
     }
 }

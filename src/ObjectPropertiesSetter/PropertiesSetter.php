@@ -74,9 +74,9 @@ class PropertiesSetter implements PropertiesSetterInterface
                 try {
                     $propertySetter->set($this->object, $property, $value);
                 } catch (\Exception $e) {
-                    $this->throwPropertiesSetterException($property);
-                } catch (\Error $e) {
-                    $this->throwPropertiesSetterException($property);
+                    $this->throwPropertiesSetterException($property, $e);
+                } catch (\TypeError $e) {
+                    $this->throwPropertiesSetterException($property, $e);
                 }
 
                 return;
@@ -103,21 +103,9 @@ class PropertiesSetter implements PropertiesSetterInterface
     private function throwPropertiesSetterException(string $propertyName, \Throwable $previousException = null)
     {
         throw new PropertiesSetterException(
-            $this->makePropertiesSetterExceptionMessage($propertyName),
+            sprintf('Cannot set property "%s" of the class "%s"', $propertyName, $this->objectReflection->getName()),
             0,
             $previousException
         );
-    }
-
-    /**
-     * Makes a message for properties setter exception
-     *
-     * @param string $propertyName
-     *
-     * @return string
-     */
-    private function makePropertiesSetterExceptionMessage(string $propertyName)
-    {
-        return sprintf('Cannot set property "%s" of the class "%s"', $propertyName, $this->objectReflection->getName());
     }
 }
