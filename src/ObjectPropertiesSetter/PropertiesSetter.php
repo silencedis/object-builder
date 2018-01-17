@@ -48,7 +48,6 @@ class PropertiesSetter implements PropertiesSetterInterface
         $this->object = $object;
         $this->objectReflection = new \ReflectionClass($object);
 
-        // todo Needs tests
         foreach ($propertySetters as $propertySetter) {
             if (!$propertySetter instanceof PropertySetterInterface) {
                 throw new PropertiesSetterException(
@@ -72,7 +71,13 @@ class PropertiesSetter implements PropertiesSetterInterface
     {
         foreach ($this->propertySetters as $propertySetter) {
             if ($propertySetter->canSet($this->objectReflection, $property, $value)) {
-                $propertySetter->set($this->object, $property, $value);
+                try {
+                    $propertySetter->set($this->object, $property, $value);
+                } catch (\Exception $e) {
+                    $this->throwPropertiesSetterException($property);
+                } catch (\Error $e) {
+                    $this->throwPropertiesSetterException($property);
+                }
 
                 return;
             }
@@ -85,5 +90,34 @@ class PropertiesSetter implements PropertiesSetterInterface
                 $this->objectReflection->getName()
             )
         );
+    }
+
+    /**
+     * Throws PropertiesSetterException
+     *
+     * @param string $propertyName
+     * @param \Throwable|null $previousException
+     *
+     * @throws \SilenceDis\ObjectBuilder\ObjectPropertiesSetter\PropertiesSetterException
+     */
+    private function throwPropertiesSetterException(string $propertyName, \Throwable $previousException = null)
+    {
+        throw new PropertiesSetterException(
+            $this->makePropertiesSetterExceptionMessage($propertyName),
+            0,
+            $previousException
+        );
+    }
+
+    /**
+     * Makes a message for properties setter exception
+     *
+     * @param string $propertyName
+     *
+     * @return string
+     */
+    private function makePropertiesSetterExceptionMessage(string $propertyName)
+    {
+        return sprintf('Cannot set property "%s" of the class "%s"', $propertyName, $this->objectReflection->getName());
     }
 }
